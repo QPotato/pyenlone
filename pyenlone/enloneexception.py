@@ -1,0 +1,2 @@
+class EnlOneException(Exception):
+    pass
