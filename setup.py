@@ -1,13 +1,20 @@
-from setuptools import setup
+import setuptools
 
-setup(name='pyenlone',
-      version='0.1',
-      description='Python wrapper for enl.one API',
-      url='https://gitlab.com/potato-tools/pyenlone',
-      author='QuanticPotato',
-      license='MIT',
-      packages=['pyenlone'],
-      zip_safe=False)
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
-
-#dependencias: requests, requests_cache, requests_oauthlib, munch
+setuptools.setup(
+    name="pyenlone",
+    version="0.1.0",
+    author="QuanticPotato",
+    description="A python implementation of enl.one API",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    url="https://gitlab.com/potato-tools/pyenlone",
+    packages=setuptools.find_packages(),
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "License :: OSI Approved :: MIT License",
+        "Operating System :: OS Independent",
+    ],
+)

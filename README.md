@@ -1,7 +1,3 @@
 # pyenlone
 
-Python wrapper for enl.one API
-
-Example code:
-
-from pyenlone import EnlOne
+Python implementation for enl.one API
