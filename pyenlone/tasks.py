@@ -53,23 +53,3 @@ class Tasks:
         raise EnlOneException("Not implemented yet.")
     def post_task():
         raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
-    def ():
-        raise EnlOneException("Not implemented yet.")
