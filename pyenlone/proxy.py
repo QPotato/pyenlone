@@ -7,7 +7,7 @@ from enloneexception import EnlOneException
 
 class Proxy(ABC):
     @abstractmethod
-    get(self, endpoint, params): pass
+    def get(self, endpoint, params): pass
 
 class KeyProxy(Proxy):
     def __init__(self, base_url, apikey, cache=0):
@@ -15,7 +15,7 @@ class KeyProxy(Proxy):
         self._base_url = base_url
         if cache > 0:
             requests_cache.install_cache('apikey_cache', backend='sqlite', expire_after=cache)
-    def get(self, endpoint, params):
+    def get(self, endpoint, params={}):
         url = self._base_url + "/api" + endpoint
         data = dict({"apikey" : self._apikey}, **params)
         try:
