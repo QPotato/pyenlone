@@ -1,3 +1,8 @@
+"""
+Basic example showing the use of API Key auth and teams.
+
+To run this example, put a valid API Key ona file called "APIKEY".
+"""
 from pyenlone import V
 
 with open("APIKEY") as input_file:
