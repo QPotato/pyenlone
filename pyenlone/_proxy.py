@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 
 import requests
-import requests_cache
+from requests_cache import CachedSession
 from munch import munchify
 
 from .enloneexception import EnlOneException
@@ -26,10 +26,7 @@ class KeyProxy(Proxy):
     def __init__(self, base_url, apikey, cache=0):
         self._apikey = apikey
         self._base_url = base_url
-        if cache > 0:
-            requests_cache.install_cache('apikey_cache',
-                                         backend='sqlite',
-                                         expire_after=cache)
+        self._session = CachedSession(expire_after=cache)
 
     def get(self, endpoint, params={}):
         """
@@ -38,7 +35,7 @@ class KeyProxy(Proxy):
         url = self._base_url + endpoint
         params["apikey"] = self._apikey
         try:
-            response = requests.get(url, params=params)
+            response = self._session.get(url, params=params)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
@@ -52,8 +49,9 @@ class KeyProxy(Proxy):
         """
         url = self._base_url + endpoint
         try:
-            response = requests.post(url, params={"apikey": self._apikey},
-                                     json=json)
+            response = self._session.post(url,
+                                          params={"apikey": self._apikey},
+                                          json=json)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
@@ -69,9 +67,7 @@ class TokenProxy(Proxy):
     def __init__(self, base_url, token, cache=0):
         self._token = token
         self._base_url = base_url + "/oauth"
-        if cache > 0:
-            requests_cache.install_cache('token_cache', backend='sqlite',
-                                         expire_after=cache)
+        self._session = CachedSession(expire_after=cache)
 
     def get(self, endpoint, params={}):
         """
@@ -80,7 +76,7 @@ class TokenProxy(Proxy):
         url = self._base_url + endpoint
         headers = {'Authorization': 'Bearer ' + self._token}
         try:
-            response = requests.get(url, headers=headers, params=params)
+            response = self._session.get(url, headers=headers, params=params)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
@@ -95,7 +91,7 @@ class TokenProxy(Proxy):
         url = self._base_url + endpoint
         headers = {'Authorization': 'Bearer ' + self._token}
         try:
-            response = requests.post(url, headers=headers, json=json)
+            response = self._session.post(url, headers=headers, json=json)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
@@ -114,7 +110,7 @@ class OpenProxy:
         """
         url = "https://v.enl.one/OpenApi" + endpoint
         try:
-            response = requests.get(url)
+            response = self._session.get(url)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":

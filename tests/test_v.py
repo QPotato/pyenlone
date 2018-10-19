@@ -8,7 +8,7 @@ class TestV(unittest.TestCase):
     def setUp(self):
         with open("APIKEY") as input_file:
             apikey = input_file.read()[:-1]
-        self.key_api = V(apikey=apikey)
+        self.key_api = V(apikey=apikey, cache=1)
 
     def test_search(self):
         result = self.key_api.search_one(query="QuanticPotato")
