@@ -5,13 +5,18 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyenlone",
-    version="0.1.0",
+    version="0.1.1",
     author="QuanticPotato",
     description="A python implementation of enl.one API",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/potato-tools/pyenlone",
     packages=setuptools.find_packages(),
+    install_requires=[
+          'requests',
+          'requests_cache',
+          'munch',
+      ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
