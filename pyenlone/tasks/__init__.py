@@ -8,7 +8,10 @@ from .message import Message
 from .grant import Grant
 from .._proxy import TokenProxy, KeyProxy
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> trash commit
 __all__ = [Operation, Task, Message, Grant]
 
 
@@ -33,6 +36,7 @@ class TaskType(Enum):
     OTHER = 99
 
 Box = Tuple[char, char, char, char]
+<<<<<<< HEAD
     
 class Tasks:
     def __init__(self, apikey=None: str, voauth=None: str, rocks=None: str, enlio=None:str, cache=0: int):
@@ -55,3 +59,18 @@ class Tasks:
         pass
     
     
+=======
+
+
+class TasksAPIFactory():
+    def __init__(self, token, cache=0):
+        self._proxy = TokenProxy("https://tasks.enl.one", token, cache=cache)
+        pass
+
+    def new_operation(self, name: str, type: OpType,
+                      box: Box=None) -> Operation:
+        return Operation(_proxy)
+
+    def load_operation(self, id: int) -> Operation:
+        pass
+>>>>>>> trash commit
