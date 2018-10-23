@@ -9,7 +9,8 @@ All methods returns Munches. That only means you access them both as:
 - `some_result.some_property`
 - `some_result['some_property']`
 """
-from .v import V, banned
+from .v import V, banned, Agent, DetailAgent, Team, TeamRole, TeamMember
 from .enloneexception import EnlOneException
-__all__ = ["V", "banned", "EnlOneException"]
+__all__ = ["V", "banned", "EnlOneException", "Agent", "DetailAgent", "Team",
+           "TeamMember", "TeamRole"]
 NAME = "pyenlone"

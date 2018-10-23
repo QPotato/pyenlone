@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 import requests
 from requests_cache import CachedSession
-from munch import munchify
 
 from .enloneexception import EnlOneException
 
@@ -39,7 +38,7 @@ class KeyProxy(Proxy):
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
-            return munchify(response.json()["data"])
+            return response.json()["data"]
         else:
             raise EnlOneException("enl.one API call error.")
 
@@ -55,7 +54,7 @@ class KeyProxy(Proxy):
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
-            return munchify(response.json()["data"])
+            return response.json()["data"]
         else:
             raise EnlOneException("enl.one API call error.")
 
@@ -80,7 +79,7 @@ class TokenProxy(Proxy):
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
-            return munchify(response.json()["data"])
+            return response.json()["data"]
         else:
             raise EnlOneException("enl.one API call error.")
 
@@ -95,7 +94,7 @@ class TokenProxy(Proxy):
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
-            return munchify(response.json()["data"])
+            return response.json()["data"]
         else:
             raise EnlOneException("enl.one API call error.")
 
@@ -104,6 +103,9 @@ class OpenProxy:
     """
     Proxy implementation for the open API.
     """
+    def __init__(self, cache=0):
+        self._session = CachedSession(expire_after=cache)
+
     def get(self, endpoint):
         """
         Do a get request with no auth.
@@ -114,6 +116,6 @@ class OpenProxy:
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         if response and response.json()["status"] == "ok":
-            return munchify(response.json()["data"])
+            return response.json()["data"]
         else:
             raise EnlOneException("enl.one API call error.")

@@ -10,3 +10,6 @@ APIKEY
 TOKEN
 dist/
 build/
+.cache
+cache.sqlite
+token_cache.sqlite

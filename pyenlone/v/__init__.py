@@ -9,12 +9,22 @@ More detailed documentation on each method on
     https://v.enl.one/apikey and
     https://v.enl.one/oauth/clients
 """
-from ._proxy import TokenProxy, KeyProxy, OpenProxy
-from ._oauth import VOAuth
-from .enloneexception import EnlOneException
+from typing import List, Dict
+
+from .._proxy import TokenProxy, KeyProxy, OpenProxy
+from ._oauth import OAuthDelegate
+from ._apikey import ApikeyDelegate
+from .agent import Agent
+from .detail_agent import DetailAgent
+from .team import Team, TeamRole
+from .team_member import TeamMember
+from ..enloneexception import EnlOneException
+
+__all__ = ["Agent", "DetailAgent", "Team", "TeamMember", "TeamRole", "V",
+           "banned"]
 
 
-def banned(gid):
+def banned(gid: str):
     """
     Returns True iff the given google id correspond to an agent marked
     on V as banned.
@@ -42,34 +52,38 @@ class V:
             self._proxy = TokenProxy(self._base_url,
                                      kwargs["token"],
                                      cache=cache)
-            self._oauth = VOAuth(self._proxy)
+            self._delegate = OAuthDelegate(self._proxy)
         elif "apikey" in kwargs:
             self._proxy = KeyProxy(self._base_url,
                                    kwargs["apikey"],
                                    cache=cache)
+            self._delegate = ApikeyDelegate(self._proxy)
         else:
             raise EnlOneException("You need to either provide token or apikey as keyword argument.")
 
     # v1 general endpoints
-    def trust(self, enlid):
+    def trust(self, enlid: str) -> Agent:
         """
         V-Points and V-Level could be queried by enlid.
         If you are VL2 or higher, you can also query V-Points and -Level using
         the Google+ ID instead of ENLID.
         Both API key and OAuth should work with this method.
         """
-        return self._proxy.get("/api/v1/agent/" + enlid + "/trust")
+        api_result = self._proxy.get("/api/v1/agent/" + enlid + "/trust")
+        api_result["enlid"] = enlid
+        return Agent(api_result)
 
-    def search(self, **kwargs):
+    def search(self, **kwargs) -> Agent:
         """
         Agents could be found by using this method. Several keywordarguments
         could be set to restrict the results.
         To receive some results either query or lat/lon must be set.
         Both API key and OAuth should work with this method.
         """
-        return self._proxy.get("/api/v1/search", params=kwargs)
+        api_result = self._proxy.get("/api/v1/search", params=kwargs)
+        return [Agent(a) for a in api_result]
 
-    def distance(self, enlid1, enlid2):
+    def distance(self, enlid1: str, enlid2: str) -> List[Agent]:
         """
         Like in a profile, the connections between two agents can be queried
         using this method.
@@ -77,9 +91,10 @@ class V:
         instead of ENLID.
         Both API key and OAuth should work with this method.
         """
-        return self._proxy.get("/api/v1/agent/" + enlid1 + "/" + enlid2).hops
+        api_result = self._proxy.get("/api/v1/agent/" + enlid1 + "/" + enlid2)
+        return [Agent(a) for a in api_result["hops"]]
 
-    def bulk_info(self, ids, telegramid=False, gid=False, array=False):
+    def bulk_info(self, ids: List[str], telegramid=False, gid=False, array=False) -> List[Agent]:
         """
         To reduce the amount of requests, multiple agent could be queried
         using this method.
@@ -93,34 +108,39 @@ class V:
             url += "/gid"
         if array:
             url += "/array"
-        return self._proxy.post(url, ids)
+            api_result = self._proxy.post(url, ids)
+            return [Agent(a) if a is not None else None for a in api_result]
+        api_result = self._proxy.post(url, ids)
+        return {enlid: (Agent(a) if a is not None else None)
+                for (enlid, a) in api_result.items()}
 
-    def location(self, enlid):
+    def location(self, enlid: str) -> Dict:
         """
         To retrive the location of an agent.
         Both API key and OAuth should work with this method.
         """
         return self._proxy.get("/api/v1/agent/" + enlid + "/location")
 
-    def whoami(self):
+    def whoami(self) -> DetailAgent:
         """
         To retrieve the data of the owner of this apikey.
         This method is API key specific.
         """
-        return self._proxy.get("/api/v1/whoami")
+        return self._delegate.whoami()
     # TODO: profile pictures
 
     # v2 endpoints
-    def list_teams(self):
+    def list_teams(self) -> List[Team]:
         """
         You can list all teams of the user by using this method.
         Extension in V2: This can handle teams where members can be assigned
         multiple roles.
         Both API key and OAuth should work with this method.
         """
-        return self._proxy.get("/api/v2/teams", )
+        api_result = self._proxy.get("/api/v2/teams")
+        return [Team(t) for t in api_result]
 
-    def team_details(self, teamid):
+    def team_details(self, teamid) -> List[TeamMember]:
         """
         To retrieve a list of all members of a specific team.
         Extension in V2: This can handle teams where members can be assigned
@@ -129,46 +149,49 @@ class V:
         more data then the other APIs.
         Both API key and OAuth should work with this method.
         """
-        return self._proxy.get("/api/v2/teams/" + str(teamid))
+        api_result = self._proxy.get("/api/v2/teams/" + str(teamid))
+        return [TeamMember(tm) for tm in api_result]
 
     # OAuth specifics
-    def profile(self):
+    def profile(self) -> Agent:
         """
         https://v.enl.one/oauth/clients
         This method is OAuth specific.
         """
-        return self._oauth.profile()
+        return self._delegate.profile()
 
-    def googledata(self):
+    def googledata(self) -> Dict:
         """
         https://v.enl.one/oauth/clients
         This method is OAuth specific.
         """
-        return self._oauth.googledata()
+        return self._delegate.googledata()
 
-    def email(self):
+    def email(self) -> str:
         """
         This method is OAuth specific.
         """
-        return self._oauth.email()
+        return self._delegate.email()
 
-    def telegram(self):
+    def telegram(self) -> str:
         """
         https://v.enl.one/oauth/clients
         This method is OAuth specific.
         """
-        return self._oauth.telegram()
+        return self._delegate.telegram()
 
     # Short-handers
-    def search_one(self, **kwargs):
+    def search_one(self, **kwargs) -> Agent:
         """
         Short-hand to search for the first result.
         Both API key and OAuth should work with this method.
         """
         return self.search(**kwargs)[0]
 
-    def is_ok(self, agent):
+    def is_ok(self, agent) -> bool:
         """
+        DEPRECATED: use agent.is_ok instead.
+
         Given a search result, return true iff the agent is:
         verified, active, not quarantined, not blacklisted and not banned
         by nia.
@@ -179,11 +202,3 @@ class V:
                and not agent.quarantine \
                and not agent.blacklisted \
                and not agent.banned_by_nia
-
-
-class Team:
-    pass
-
-
-class TeamMember(Agent):
-    pass
