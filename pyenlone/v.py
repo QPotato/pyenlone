@@ -179,3 +179,11 @@ class V:
                and not agent.quarantine \
                and not agent.blacklisted \
                and not agent.banned_by_nia
+
+
+class Team:
+    pass
+
+
+class TeamMember(Agent):
+    pass
