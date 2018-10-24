@@ -15,7 +15,6 @@ setuptools.setup(
     install_requires=[
           'requests',
           'requests_cache',
-          'munch',
       ],
     classifiers=[
         "Programming Language :: Python :: 3",
