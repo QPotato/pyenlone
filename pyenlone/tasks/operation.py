@@ -91,84 +91,152 @@ class Operation:
 
     @property
     def id(self) -> int:
+        """
+        ID of the Operation.
+        """
         return self._id
 
     @property
     def name(self) -> Optional[str]:
+        """
+        Name of the Operation.
+        """
         return self._name
 
     @property
     def owner(self) -> IGN:
+        """
+        Owner of the operation.
+        """
         return self._owner
 
     @property
     def start(self) -> Datetime:
+        """
+        When the operations starts.
+        """
         return self._start
 
     @property
     def end(self) -> Optional[Datetime]:
+        """
+        When the operations ends.
+        """
         return self._end
 
     @property
     def type(self) -> OpType:
+        """
+        What kind of operation.
+        """
         return self._type
 
     @property
     def agent_draw(self) -> Draw:
+        """
+        A draw for that operation that is visible to all agents with read access.
+        """
         return self._agent_draw
 
     @property
     def draw(self) -> Draw:
+        """
+         The draw for that operation. Only visible to Owner and Operator!
+        """
         return self._draw
 
     @property
     def bookmark(self) -> Bookmark:
+        """
+         The bookmarks for that operation. Only visible to Owner and Operator!
+        """
         return self._bookmark
 
     @property
     def linkplan(self) -> str:
+        """
+         The draw for that operation. Only visible to Owner and Operator!
+        """
         return self._linkplan
 
     @property
     def keyplan(self) -> str:
+        """
+         The keyplan for that operation. Only visible to Owner and Operator!
+        """
         return self._keyplan
 
     @property
     def opsbf_settings(self) -> str:
+        """
+         OPSBF Settings for that operation. Only visible to Owner and Operator!
+        """
         return self._opsbf_settings
 
     @property
     def opsbf_save(self) -> str:
+        """
+         OPSBF Save for that operation. Only visible to Owner and Operator!
+        """
         return self._opsbf_save
 
     @property
     def other(self) -> Dict:
+        """
+         More data regarding that operation. An Object (Hash dictionary) with
+         name:value pairs. You can store whatever you want. Only visible to
+         Owner and Operator!
+        """
         return self._other
 
     @property
     def displayOrder(self) -> List:
+        """
+         Array of task IDs as integers to indicate the order the tasks should
+         be displayed in clients.
+        """
         return self._displayOrder
 
     @property
     def glympse(self) -> str:
+        """
+         The glympse tag for that operation, can be presented on client as a
+         link to app: http://glympse.com/!your_group_name
+         (always starts with !).
+        """
         return self._glympse
 
     @property
     def statusTag(self) -> str:
+        """
+         The tag for that operation, to share location in this operation.
+        """
         return self._statusTag
 
     @property
     def ne(self) -> LatLng:
+        """
+         Area Management - the Box defining the area.
+        """
         return self._ne
 
     @property
     def nw(self) -> LatLng:
+        """
+         Area Management - the Box defining the area.
+        """
         return self._nw
 
     @property
     def se(self) -> LatLng:
+        """
+         Area Management - the Box defining the area.
+        """
         return self._se
 
     @property
     def sw(self) -> LatLng:
+        """
+         Area Management - the Box defining the area.
+        """
         return self._sw

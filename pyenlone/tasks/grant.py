@@ -68,8 +68,14 @@ class Grant:
 
         @property
         def role(self) -> Union(RoleType, str):
+            """
+            Role/Sub group of the team.
+            """
             return self._role
 
         @property
         def team(self) -> int:
+            """
+            Rocksevent Team ID.
+            """
             return self._team
