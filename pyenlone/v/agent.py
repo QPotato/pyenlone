@@ -1,3 +1,10 @@
+from typing import NewType
+
+IGN = NewType("IGN", str)
+GID = NewType("GID", str)
+VLevel = NewType("VLevel", int)
+
+
 class Agent:
     """
     Basic agent data.

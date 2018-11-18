@@ -1,7 +1,12 @@
 from datetime import Datetime
 from enum import Enum
-from typing import Optional, List, Tuple
-from ..types import OpID, TaskID, PortalID, IGN, GID
+from typing import Optional, List, Tuple, NewType
+
+from operation import OpID
+from v import IGN, GID
+
+TaskID = NewType("TaskID", int)
+PortalID = NewType("PortalID", str)
 
 
 class TaskType(Enum):

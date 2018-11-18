@@ -14,14 +14,14 @@ from typing import List, Dict
 from .._proxy import TokenProxy, KeyProxy, OpenProxy
 from ._oauth import OAuthDelegate
 from ._apikey import ApikeyDelegate
-from .agent import Agent
+from .agent import Agent, IGN, GID
 from .detail_agent import DetailAgent
 from .team import Team, TeamRole
 from .team_member import TeamMember
 from ..enloneexception import EnlOneException
 
 __all__ = ["Agent", "DetailAgent", "Team", "TeamMember", "TeamRole", "V",
-           "banned"]
+           "banned", "IGN", "GID"]
 
 
 def banned(gid: str):

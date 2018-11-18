@@ -1,5 +1,7 @@
 from datetime import Datetime
-from ..types import MessageID
+from typing import NewType
+
+MessageID = NewType("MessageID", int)
 
 
 class Message:
@@ -20,16 +22,35 @@ class Message:
 
     @property
     def id(self):
+        """
+         The message id.
+        """
         return self._id
 
     @property
     def message(self):
+        """
+         The message you want to send.
+        """
         return self._message
 
     @property
+    def reply_to(self):
+        """
+         The message id you want reply to.
+        """
+        return self._reply_to
+
+    @property
     def time(self):
+        """
+         The time the message were created.
+        """
         return self._time
 
     @property
     def edit_time(self):
+        """
+         The time the message were updated.
+        """
         return self._edit_time

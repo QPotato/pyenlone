@@ -1,7 +1,13 @@
 from enum import Enum
 from datetime import Datetime
-from typing import Optional, List, Dict
-from ..types import OpID, IGN, Draw, Bookmark, LatLng
+from typing import Optional, List, Dict, NewType
+
+from v import IGN
+
+OpID = NewType("OpID", int)
+Draw = NewType("Draw", str)
+Bookmark = NewType("Bookmark", str)
+LatLng = NewType("LatLng", str)
 
 
 class OpType(Enum):
@@ -134,7 +140,8 @@ class Operation:
     @property
     def agent_draw(self) -> Draw:
         """
-        A draw for that operation that is visible to all agents with read access.
+        A draw for that operation that is visible to all agents
+        with read access.
         """
         return self._agent_draw
 

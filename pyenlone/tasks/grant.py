@@ -1,9 +1,10 @@
 from enum import Enum
 from typing import Union, NewType
-from ..types import GID, TeamID, RocksApikey, VLevel
+from ..types import GID, TeamID, VLevel
 from .v import RoleType
 
 Permission = NewType("Permission", str)
+RocksApikey = NewType("RocksApikey", int)
 
 
 class GrantType(Enum):
