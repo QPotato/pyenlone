@@ -23,7 +23,7 @@ class RoleType(Enum):
 class TeamRole:
     def __init__(self, id, name):
         self._id = id
-        role_translation = {
+        role_translation = {  # TODO: esto deberia estar en la clase y despues llamar al .value al momento de mandarlo al server
             "Planner": RoleType.PLANNER,
             "Operator": RoleType.OPERATOR,
             "Linker": RoleType.LINKER,
@@ -47,6 +47,7 @@ class TeamRole:
     @property
     def name(self):
         return self._name
+
 
 class Team:
     def __init__(self, api_result):

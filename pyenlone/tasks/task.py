@@ -22,10 +22,9 @@ class TaskType(Enum):
 
 
 class TaskStatus(Enum):
-    PENDING = 1
-    ACKNOWLEDGE = 2
-    DONE = 3
-    OTHER = 99
+    PENDING = "pending"
+    ACKNOWLEDGE = "acknowledge"
+    DONE = "done"
 
 
 class LinkTarget:
@@ -107,12 +106,7 @@ class Task:
         else:
             self._group_name = None
         if "status" in api_result:
-            apires_to_task_status = {
-                "pending": TaskStatus.PENDING,
-                "acknowledge": TaskStatus.ACKNOWLEDGE,
-                "done": TaskStatus.DONE
-            }
-            self._status = apires_to_task_status[api_result["status"]]
+            self._status = TaskStatus(api_result["status"])
         else:
             self._status = None
         if "portalImage" in api_result:
@@ -299,3 +293,88 @@ class Task:
          Image url for portal.
         """
         return self._portal_image
+
+    def save(self):
+        """
+        Save changes to Tasks server.
+        """
+        pass
+
+    def update(self):
+        """
+        Update data from Tasks servers.
+        """
+        pass
+
+    def delete(self):
+        """
+        Delete this task.
+        Also deletes task specific grants.
+        """
+        pass
+
+    def accept(self):
+        """
+        User accepts this task.
+        """
+        pass
+
+    def decline(self):
+        """
+        User who accpeted this task declines it afterwards.
+        """
+        pass
+
+    def acknowledge(self):
+        """
+        User who accepted this task.
+        """
+        pass  # TODO: checkear si podemos devolver un Agent aca
+
+    def set_complete(self):
+        """
+        User has completed this task.
+        """
+        pass
+
+    def get_complete(self):
+        """
+        Who completed this task?
+        """
+        pass
+
+    def add_grant(self):
+        """
+        Grant permission on this task.
+        """
+        pass
+
+    def remove_grant(self):
+        """
+        Remove grant.
+        """
+        pass
+
+    def get_grants(self):
+        """
+        Retrieve all grants on this op.
+        """
+        pass
+
+    def my_grants(self):
+        """
+        Retrieve all grants applicable to this user.
+        """
+        pass
+
+    def assign(self):
+        """
+        Assign this task to a user or list of users.
+        """
+        pass
+
+    def unassign(self):
+        """
+        Unassign task.
+        """
+        pass

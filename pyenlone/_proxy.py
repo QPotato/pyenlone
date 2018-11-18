@@ -17,6 +17,12 @@ class Proxy(ABC):
     @abstractmethod
     def post(self, endpoint, json): pass
 
+    @abstractmethod
+    def delete(self, endpoint, json): pass
+
+    @abstractmethod
+    def put(self, endpoint, json): pass
+
 
 class KeyProxy(Proxy):
     """

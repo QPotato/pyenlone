@@ -54,3 +54,9 @@ class Message:
          The time the message were updated.
         """
         return self._edit_time
+
+    def edit(self):
+        pass
+
+    def delete(self):
+        pass

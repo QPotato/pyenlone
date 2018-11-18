@@ -1,6 +1,6 @@
 from enum import Enum
 from datetime import Datetime
-from typing import Optional, List, Dict, NewType
+from typing import Optional, List, Tuple, Dict, NewType
 
 from v import IGN
 
@@ -11,16 +11,18 @@ LatLng = NewType("LatLng", str)
 
 
 class OpType(Enum):
-    FIELD = 0
-    FIELD_DEFENSE = 1
-    AREA = 2
-    LINKSTAR = 3
-    LINKART = 4
-    OTHER = 5
+    FIELD = "field"
+    FIELD_DEFENSE = "field-defense"
+    AREA = "area"
+    LINKSTAR = "linkstar"
+    LINKART = "linkart"
+    OTHER = "other"
 
 
 class Operation:
-    def __init__(self, api_result):
+    def __init__(self, proxy, api_result):
+        self._proxy = proxy
+
         self._id = OpID(api_result["id"])
         self._name = IGN(api_result["name"])
         self._owner = api_result["owner"]
@@ -29,15 +31,7 @@ class Operation:
             self._end = Datetime(api_result["end"])
         else:
             self._end = None
-        apires_to_optype = {
-            "field": OpType.FIELD,
-            "field-defende": OpType.FIELD_DEFENSE,
-            "area": OpType.AREA,
-            "linkstar": OpType.LINKSTAR,
-            "linkart": OpType.LINKART,
-            "other": OpType.OTHER,
-        }
-        self._type = apires_to_optype[api_result["type"]]
+        self._type = OpType(api_result["type"])
         if "agentDraw" in api_result:
             self._agent_draw = Draw(api_result["agentDraw"])
         else:
@@ -247,3 +241,106 @@ class Operation:
          Area Management - the Box defining the area.
         """
         return self._sw
+
+    def save(self):
+        """
+        Save all changes to Tasks server.
+        """
+        self._proxy.put("/op/" + self.id)
+
+    def update(self):
+        """
+        Update data from Tasks servers.
+        """
+        pass
+
+    def delete(self):
+        """
+        Delete this operation.
+        Also deletes all tasks, messages and grants.
+        """
+        pass
+
+    def new_task(self):
+        """
+        Add a new task.
+        """
+        pass
+
+    def bulk_new_task(self, tasks: Tuple):
+        """
+        Bulk add new tasks.
+        """
+        pass
+
+    def get_task(self):
+        """
+        Retrieve specific task.
+        """
+        pass
+
+    def get_tasks(self):
+        """
+        Retrieve all task of this operation the user can see.
+        """
+        pass
+
+    def search_tasks(self, lat, lon, km):
+        """
+        Find all tasks in a radius of km from lat/lon visible to the user.
+        """
+        pass
+
+    def add_grant(self):
+        """
+        Grant permission.
+        """
+        pass
+
+    def remove_grant(self):
+        """
+        Remove grant.
+        """
+        pass
+
+    def get_grants(self):
+        """
+        Retrieve all grants on this op.
+        """
+        pass
+
+    def my_grants(self):
+        """
+        Retrieve all grants applicable to this user.
+        """
+        pass
+
+    def new_message(self):
+        """
+        Post message to the op-chat.
+        """
+        pass
+
+    def get_messages(self, offset=0):
+        """
+        Retrieve up to 50 messages, add offset to query more
+        """
+        pass
+
+    def get_message(self, message_id):
+        """
+        Retrieve a specific message.
+        """
+        pass
+
+    def get_users(self):
+        """
+        Returns Array of agents with permissions.
+        """
+        pass
+
+    def sync_rocks_comm(self):
+        """
+        For Webhooks from rocks
+        """
+        pass
