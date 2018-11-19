@@ -20,61 +20,77 @@ class Tasks:
                  voauth: Optional[str] = None,
                  rocks: Optional[str] = None,
                  enlio: Optional[str] = None,
+                 google: Optional[str] = None,
+                 firebase: Optional[str] = None,
                  cache: int = 0):
-        self._proxy = TokenProxy("https://tasks.enl.one", token, cache=cache)
-        pass
+        url = "https://tasks.enl.one"
+        if apikekey:
+            self._proxy = KeyProxy(url + "/api", apikey, cache=cache)
+        elif voauth:
+            self._proxy = TokenProxy(url + "/oauth", "VOAuth " + token, cache=cache)
+        elif rocks:
+            self._proxy = TokenProxy(url + "/rocks", "Rocks " + token, cache=cache)
+        elif enlio:
+            self._proxy = TokenProxy(url + "/enlio", "EnlIO " + token, cache=cache)
+        elif google:
+            self._proxy = TokenProxy(url + "/gapi", "Google " + token, cache=cache)
+        elif firebase:
+            self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + token, cache=cache)
 
-    def get_operation(id: OpID):
+    def get_operation(self, id: OpID):
         """
          Retrive Operation.
         """
-        pass
+        return Operation(self._proxy, self._proxy.get("/op/" + id))
 
     def get_operations(self, **filters) -> List[Operation]:
         """
          Get all operations user is owner, operator or can see.
         """
-        pass
+        return [Operation(self._proxy, api_res) for api_res
+                in self._proxy.get("/ops", filters)]
 
     def new_operation(self, name: str, op_type: OpType, **params) -> Operation:
         """
          Add new operation.
+         Required parameters are name and type.
+         Aditional initializing arguments can be passes in keyword arguments.
         """
         params["name"] = name
         params["optype"] = op_type.value
-        api_res = self._proxy.post("/op", params)
-        return Operation(self._proxy, api_res)
+        return Operation(self._proxy, self._proxy.post("/op", params))
 
-    def search_operations(lat: float, lon: float, km: int) -> List[Operation]:
+    def search_operations(lat: float, lon: float, km: int, **filters) -> List[Operation]:
         """
-        Returns Array of ops with tasks in range
-        (lat = float; lon = float; range = radius in KM)
+        Find all operations with tasks in a radius of km from lat/lon visible
+        to the user.
+        Aditional search filters can be passed in keyword arguments.
         """
-        pass
+        return [Operation(self._proxy, api_res) for api_res
+                in self._proxy.get("/ops/search"
+                                   + "/" + str(lat)
+                                   + "/" + str(lon)
+                                   + "/" + str(km),
+                                   filters)]
 
     def get_tasks(self, **filters) -> List[Task]:
         """
         Retrieve all tasks visible to the user,
         from all operations.
         """
-        pass
+        return [Task(self._proxy, api_res) for api_res
+                in self._proxy.get("/tasks", filters)]
+
 
     def search_tasks(lat: float, lon: float, km: float) -> List[Task]:
         """
         Find all tasks in a radius of km from lat/lon visible to the user,
         from all operations.
+        Aditional search filters can be passed in keyword arguments.
         """
-        pass
-
-
-class TasksAPIFactory():
-    def __init__(self, token, cache=0):
-        self._proxy = TokenProxy("https://tasks.enl.one", token, cache=cache)
-        pass
-
-    def new_operation(self, name: str, type: OpType,
-                      box: Box=None) -> Operation:
-        return Operation(_proxy)
-
-    def load_operation(self, id: int) -> Operation:
-        pass
+        return [Task(self._proxy, api_res) for api_res
+                in self._proxy.get("/tasks/search"
+                                   + "/" + str(lat)
+                                   + "/" + str(lon)
+                                   + "/" + str(km),
+                                   filters)]

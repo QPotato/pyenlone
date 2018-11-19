@@ -294,54 +294,27 @@ class Task:
         """
         return self._portal_image
 
+    def _base_url(self):
+        return "/op/" + str(self.op) + "/task/" + str(self.id)
+          
     def save(self):
         """
         Save changes to Tasks server.
         """
-        pass
+        self._proxy.put(self._base_url(), self._to_api())
 
     def update(self):
         """
         Update data from Tasks servers.
         """
-        pass
+        self._from_api(self._proxy.get(self._base_url()))
 
     def delete(self):
         """
         Delete this task.
         Also deletes task specific grants.
         """
-        pass
-
-    def accept(self):
-        """
-        User accepts this task.
-        """
-        pass
-
-    def decline(self):
-        """
-        User who accpeted this task declines it afterwards.
-        """
-        pass
-
-    def acknowledge(self):
-        """
-        User who accepted this task.
-        """
-        pass  # TODO: checkear si podemos devolver un Agent aca
-
-    def set_complete(self):
-        """
-        User has completed this task.
-        """
-        pass
-
-    def get_complete(self):
-        """
-        Who completed this task?
-        """
-        pass
+        self._proxy.put(self._base_url())
 
     def add_grant(self):
         """
@@ -367,14 +340,45 @@ class Task:
         """
         pass
 
+    def accept(self):
+        """
+        User accepts this task.
+        """
+        self._proxy.post(self._base_url() + "/acknowledge")
+
+    def decline(self):
+        """
+        User who accepted this task declines it afterwards.
+        """
+        self._proxy.delete(self._base_url() + "/acknowledge")
+
+    def acknowledge(self):
+        """
+        User who accepted this task.
+        """
+        self._proxy.get(self._base_url() + "/acknowledge") # TODO: checkear si podemos devolver un Agent aca
+
+    def set_complete(self):
+        """
+        User has completed this task.
+        """
+        self._proxy.post(self._base_url() + "/complete")
+
+    def get_complete(self):
+        """
+        User who completed this task.
+        """
+        self._proxy.get(self._base_url() + "/complete") # TODO: checkear si podemos devolver un Agent aca
+
     def assign(self):
         """
         Assign this task to a user or list of users.
         """
-        pass
+        self._proxy.post(self._base_url() + "/assigned")
 
     def unassign(self):
         """
         Unassign task.
         """
-        pass
+        self._proxy.post(self._base_url() + "/assigned")
+

@@ -2,8 +2,8 @@ from enum import Enum
 from datetime import Datetime
 from typing import Optional, List, Tuple, Dict, NewType
 
-from v import IGN
-
+from .v import IGN
+from task import Task, TaskType
 OpID = NewType("OpID", int)
 Draw = NewType("Draw", str)
 Bookmark = NewType("Bookmark", str)
@@ -24,6 +24,9 @@ class Operation:
         self._proxy = proxy
 
         self._id = OpID(api_result["id"])
+        self._from_api(api_result)
+
+    def _from_api(self, api_result):
         self._name = IGN(api_result["name"])
         self._owner = api_result["owner"]
         self._start = Datetime(api_result["start"])
@@ -242,54 +245,72 @@ class Operation:
         """
         return self._sw
 
+    def _base_url(self):
+        return "/op/" + str(self.id)
+        
     def save(self):
         """
         Save all changes to Tasks server.
         """
-        self._proxy.put("/op/" + self.id)
+        self._proxy.put(self._base_url(), self._to_api())
 
     def update(self):
         """
         Update data from Tasks servers.
         """
-        pass
+        self._from_api(self._proxy.get(self._base_url())
 
     def delete(self):
         """
         Delete this operation.
         Also deletes all tasks, messages and grants.
         """
-        pass
+        self._proxy.delete(self._proxy.get(self._base_url())
 
-    def new_task(self):
+    def new_task(self, lat: float, lon: float, todo: TaskType, **params) -> Task:
         """
         Add a new task.
+        Requires parameters are location and type.
+        Aditional initializing parameters can be set in keyword arguments.
         """
-        pass
+        params["lat"] = lat
+        params["lon"] = lon
+        params["todo"] = TaskType.value
+        api_res = self._proxy.post(self._base_url() + "/task", params)
+        return Task(self.proxy, api_res)
 
-    def bulk_new_task(self, tasks: Tuple):
+    def bulk_new_task(self, tasks: Tuple) -> List[Task]:
         """
         Bulk add new tasks.
         """
         pass
 
-    def get_task(self):
+    def get_task(self, id):
         """
         Retrieve specific task.
         """
-        pass
+        return Task(self._proxy(self._base_url() + "/task/" + str(id)))
 
-    def get_tasks(self):
+    def get_tasks(self, **filters):
         """
         Retrieve all task of this operation the user can see.
+        Aditional search filters can be queried using the keyword arguments.
         """
-        pass
+        return [Task(api_res) for api_res
+                in self._proxy(self._base_url() + "/tasks")]
 
-    def search_tasks(self, lat, lon, km):
+    def search_tasks(self, lat, lon, km, **filters):
         """
         Find all tasks in a radius of km from lat/lon visible to the user.
+        Aditional search filters can be queried using the keyword arguments.
         """
-        pass
+        return [Task(api_res) for api_res
+                in self._proxy(self._base_url()
+                               + "/tasks/search"
+                               + "/" + str(lat)
+                               + "/" + str(lon)
+                               + "/" + str(km),
+                               filters)]
 
     def add_grant(self):
         """
