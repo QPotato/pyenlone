@@ -5,13 +5,13 @@ More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 from typing import Tuple, List, Optional
 
 from .operation import Operation, OpID, OpType
-from .task import Task
-from .message import Message
+from .task import Task, TaskID, TaskType, PortalID
+from .message import Message, MessageID
 from .grant import Grant
 from .._proxy import TokenProxy, KeyProxy
 
 
-__all__ = [Operation, Task, Message, Grant]
+__all__ = ["Operation", "OpID", "OpType", "Task", "TaskID", "PortalID", "Message", "MessageID", "Grant"]
 
 
 class Tasks:
@@ -24,7 +24,7 @@ class Tasks:
                  firebase: Optional[str] = None,
                  cache: int = 0):
         url = "https://tasks.enl.one"
-        if apikekey:
+        if apikey:
             self._proxy = KeyProxy(url + "/api", apikey, cache=cache)
         elif voauth:
             self._proxy = TokenProxy(url + "/oauth", "VOAuth " + token, cache=cache)

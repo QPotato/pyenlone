@@ -64,6 +64,38 @@ class KeyProxy(Proxy):
         else:
             raise EnlOneException("enl.one API call error.")
 
+    def put(self, endpoint, json):
+        """
+        Do a put request adding the apikey as a parameter.
+        """
+        url = self._base_url + endpoint
+        try:
+            response = self._session.put(url,
+                                          params={"apikey": self._apikey},
+                                          json=json)
+        except requests.exceptions.RequestException:
+            raise EnlOneException("Error contacting enl.one servers.")
+        if response and response.json()["status"] == "ok":
+            return response.json()["data"]
+        else:
+            raise EnlOneException("enl.one API call error.")
+
+    def delete(self, endpoint):
+        """
+        Do a delete request adding the apikey as a parameter.
+        """
+        url = self._base_url + endpoint
+        try:
+            response = self._session.post(url,
+                                          params={"apikey": self._apikey},
+                                          json=json)
+        except requests.exceptions.RequestException:
+            raise EnlOneException("Error contacting enl.one servers.")
+        if response and response.json()["status"] == "ok":
+            return response.json()["data"]
+        else:
+            raise EnlOneException("enl.one API call error.")
+
 
 class TokenProxy(Proxy):
     """
@@ -79,7 +111,7 @@ class TokenProxy(Proxy):
         Do a get request adding the Authorization header.
         """
         url = self._base_url + endpoint
-        headers = {'Authorization': 'Bearer ' + self._token}
+        headers = {'Authorization': self._token}
         try:
             response = self._session.get(url, headers=headers, params=params)
         except requests.exceptions.RequestException:
@@ -94,7 +126,37 @@ class TokenProxy(Proxy):
         Do a get request adding the Authorization header.
         """
         url = self._base_url + endpoint
-        headers = {'Authorization': 'Bearer ' + self._token}
+        headers = {'Authorization': self._token}
+        try:
+            response = self._session.post(url, headers=headers, json=json)
+        except requests.exceptions.RequestException:
+            raise EnlOneException("Error contacting enl.one servers.")
+        if response and response.json()["status"] == "ok":
+            return response.json()["data"]
+        else:
+            raise EnlOneException("enl.one API call error.")
+
+    def put(self, endpoint, json):
+        """
+        Do a get request adding the Authorization header.
+        """
+        url = self._base_url + endpoint
+        headers = {'Authorization': self._token}
+        try:
+            response = self._session.put(url, headers=headers, json=json)
+        except requests.exceptions.RequestException:
+            raise EnlOneException("Error contacting enl.one servers.")
+        if response and response.json()["status"] == "ok":
+            return response.json()["data"]
+        else:
+            raise EnlOneException("enl.one API call error.")
+
+    def delete(self, endpoint, json):
+        """
+        Do a get request adding the Authorization header.
+        """
+        url = self._base_url + endpoint
+        headers = {'Authorization': self._token}
         try:
             response = self._session.post(url, headers=headers, json=json)
         except requests.exceptions.RequestException:

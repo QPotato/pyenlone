@@ -1,11 +1,14 @@
-from datetime import Datetime
+from datetime import datetime
 from typing import NewType
 
 MessageID = NewType("MessageID", int)
 
 
 class Message:
-    def __init__(self, api_res):
+    def __init__(self, proxy, op_id, api_res):
+        self._proxy = proxy
+        self._op_id = op_id
+        
         self._id = MessageID(api_res["id"])
         self._message = api_res["message"]
         if "replyTo" in api_res:
@@ -13,10 +16,10 @@ class Message:
         else:
             self._reply_to = None
         # CHECKEAR esto dice algo de timestamp
-        self._time = Datetime(api_res["time"])
+        self._time = datetime(api_res["time"])
         if "editTime" in api_res:
             # CHECKEAR esto dice algo de timestamp
-            self._edit_time = Datetime(api_res["editTime"])
+            self._edit_time = datetime(api_res["editTime"])
         else:
             self._edit_time = None
 

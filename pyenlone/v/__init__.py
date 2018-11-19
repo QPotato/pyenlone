@@ -14,14 +14,14 @@ from typing import List, Dict
 from .._proxy import TokenProxy, KeyProxy, OpenProxy
 from ._oauth import OAuthDelegate
 from ._apikey import ApikeyDelegate
-from .agent import Agent, IGN, GID
+from .agent import Agent, IGN, GID, VLevel
 from .detail_agent import DetailAgent
-from .team import Team, TeamRole
+from .team import Team, TeamRole, RoleType, TeamID
 from .team_member import TeamMember
 from ..enloneexception import EnlOneException
 
-__all__ = ["Agent", "DetailAgent", "Team", "TeamMember", "TeamRole", "V",
-           "banned", "IGN", "GID"]
+__all__ = ["Agent", "DetailAgent", "Team", "TeamID", "TeamMember", "TeamRole", "RoleType",  "V",
+           "banned", "IGN", "GID", "VLevel"]
 
 
 def banned(gid: str):
@@ -50,7 +50,7 @@ class V:
     def __init__(self, cache=0, **kwargs):
         if "token" in kwargs:
             self._proxy = TokenProxy(self._base_url,
-                                     kwargs["token"],
+                                     "Bearer " + kwargs["token"],
                                      cache=cache)
             self._delegate = OAuthDelegate(self._proxy)
         elif "apikey" in kwargs:

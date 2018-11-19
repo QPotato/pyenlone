@@ -1,30 +1,22 @@
 from enum import Enum
 from typing import Union, NewType
-from ..types import GID, TeamID, VLevel
-from .v import RoleType
+from ..v import RoleType, GID, TeamID, VLevel
 
 Permission = NewType("Permission", str)
 RocksApikey = NewType("RocksApikey", int)
 
 
 class GrantType(Enum):
-    USER = 1
-    VTEAM = 2
-    ROCKS = 3
-    VLEVEL = 4
-    ROCKSEVENT = 5
+    USER = "user"
+    VTEAM = "vteam"
+    ROCKS = "rocks"
+    VLEVEL = "vlevel"
+    ROCKSEVENT = "rocksevent"
 
 
 class Grant:
     def __init__(self, api_res):
-        apires_to_grant_type = {
-            "user": GrantType.USER,
-            "vteam": GrantType.VTEAM,
-            "rocks": GrantType.ROCKS,
-            "vlevel": GrantType.VLEVEL,
-            "rocksevent": GrantType.ROCKSEVENT,
-        }
-        self._type = apires_to_grant_type[api_res["type"]]
+        self._type = GrantType(api_res["type"])
         if self._type == GrantType.USER:
             self._id = GID(api_res["id"])
         elif self.type == GrantType.VTEAM:
@@ -34,6 +26,7 @@ class Grant:
         elif self.type == GrantType.VLEVEL:
             self._id = VLevel(api_res["id"])
         self._permission = Permission(api_res["permission"])
+        
         if "role" in api_res:
             if self.type == GrantType.VTEAM:
                 self._role = RoleType(api_res["role"])
@@ -41,6 +34,7 @@ class Grant:
                 self._role = api_res["role"]
         else:
             self._role = None
+        
         if "team" in api_res:
             self._team = api_res["team"]
         else:

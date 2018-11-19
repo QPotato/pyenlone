@@ -4,13 +4,9 @@ Implements enl.one APIs:
 - tasks.enl.one (Soon)
 - status.enl.one (Not very soon, but soon)
 For more info: https://wiki.enl.one/doku.php?id=start
-
-All methods returns Munches. That only means you access them both as:
-- `some_result.some_property`
-- `some_result['some_property']`
 """
-from .v import V, banned, Agent, DetailAgent, Team, TeamRole, TeamMember
+from .v import V, banned, Agent, DetailAgent, GID, IGN, Team, TeamID, TeamRole, TeamMember
+from .tasks import Tasks, Operation, OpType, OpID, Task, TaskID, PortalID, Message, MessageID, Grant
 from .enloneexception import EnlOneException
-__all__ = ["V", "banned", "EnlOneException", "Agent", "DetailAgent", "Team",
-           "TeamMember", "TeamRole"]
+
 NAME = "pyenlone"

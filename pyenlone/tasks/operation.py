@@ -1,9 +1,11 @@
 from enum import Enum
-from datetime import Datetime
+from datetime import datetime
 from typing import Optional, List, Tuple, Dict, NewType
 
-from .v import IGN
-from task import Task, TaskType
+from ..v import IGN
+from .task import Task, TaskType
+from .message import MessageID
+
 OpID = NewType("OpID", int)
 Draw = NewType("Draw", str)
 Bookmark = NewType("Bookmark", str)
@@ -29,9 +31,9 @@ class Operation:
     def _from_api(self, api_result):
         self._name = IGN(api_result["name"])
         self._owner = api_result["owner"]
-        self._start = Datetime(api_result["start"])
+        self._start = datetime(api_result["start"])
         if "end" in api_result:
-            self._end = Datetime(api_result["end"])
+            self._end = datetime(api_result["end"])
         else:
             self._end = None
         self._type = OpType(api_result["type"])
@@ -91,7 +93,31 @@ class Operation:
             self._sw = LatLng(api_result["sw"])
         else:
             self._sw = None
-
+    def _to_api(self):
+        return {
+            "id": self._id,
+            "name": self._name,
+            "owner": self._owner,
+            "start": self._start,  # CHEKEAR: capaz haya que convertir aca
+            "end": self._end,
+            "type": self._type.value,
+            "agentDraw": self._agent_draw,
+            "draw": self._draw,
+            "bookmark": self._bookmark,
+            "linkplan": self._linkplan,
+            "keyplan": self._keyplan,
+            "opsbf_settings": self._opsbf_settings,
+            "opsbf_save": self._opsbf_save,
+            "other": self._other,
+            "displayOrder": self._display_order,
+            "glympse": self._glympse,
+            "statusTag": self._status_tag,
+            "ne": self._ne,
+            "nw": self._nw,
+            "se": self._se,
+            "sw": self._sw
+        }
+        
     @property
     def id(self) -> int:
         """
@@ -114,14 +140,14 @@ class Operation:
         return self._owner
 
     @property
-    def start(self) -> Datetime:
+    def start(self) -> datetime:
         """
         When the operations starts.
         """
         return self._start
 
     @property
-    def end(self) -> Optional[Datetime]:
+    def end(self) -> Optional[datetime]:
         """
         When the operations ends.
         """
@@ -258,14 +284,14 @@ class Operation:
         """
         Update data from Tasks servers.
         """
-        self._from_api(self._proxy.get(self._base_url())
+        self._from_api(self._proxy.get(self._base_url()))
 
     def delete(self):
         """
         Delete this operation.
         Also deletes all tasks, messages and grants.
         """
-        self._proxy.delete(self._proxy.get(self._base_url())
+        self._proxy.delete(self._proxy.get(self._base_url()))
 
     def new_task(self, lat: float, lon: float, todo: TaskType, **params) -> Task:
         """
@@ -291,7 +317,7 @@ class Operation:
         """
         return Task(self._proxy(self._base_url() + "/task/" + str(id)))
 
-    def get_tasks(self, **filters):
+    def get_tasks(self, **filters) -> List[Task]:
         """
         Retrieve all task of this operation the user can see.
         Aditional search filters can be queried using the keyword arguments.
@@ -299,7 +325,7 @@ class Operation:
         return [Task(api_res) for api_res
                 in self._proxy(self._base_url() + "/tasks")]
 
-    def search_tasks(self, lat, lon, km, **filters):
+    def search_tasks(self, lat, lon, km, **filters) -> List[Task]:
         """
         Find all tasks in a radius of km from lat/lon visible to the user.
         Aditional search filters can be queried using the keyword arguments.
@@ -336,24 +362,25 @@ class Operation:
         """
         pass
 
-    def new_message(self):
+    def send_message(self, text: str) -> MessageID:
         """
-        Post message to the op-chat.
-        """
-        pass
-
-    def get_messages(self, offset=0):
-        """
-        Retrieve up to 50 messages, add offset to query more
+        Post new message to the op-chat.
         """
         pass
-
+        
     def get_message(self, message_id):
         """
         Retrieve a specific message.
         """
         pass
 
+
+    def get_messages(self, offset=0):
+        """
+        Retrieve up to 50 messages, add offset to query more
+        """
+        pass
+        
     def get_users(self):
         """
         Returns Array of agents with permissions.

@@ -1,10 +1,10 @@
-from datetime import Datetime
+from datetime import datetime
 from enum import Enum
 from typing import Optional, List, Tuple, NewType
 
-from operation import OpID
-from v import IGN, GID
+from ..v import IGN, GID
 
+OpID = NewType("OpID", int)
 TaskID = NewType("TaskID", int)
 PortalID = NewType("PortalID", str)
 
@@ -58,9 +58,9 @@ class Task:
             self._comment = api_result["comment"]
         else:
             self._comment = None
-        self._start = Datetime(api_result["start"])
+        self._start = datetime(api_result["start"])
         if "end" in api_result:
-            self._end = Datetime(api_result["end"])
+            self._end = datetime(api_result["end"])
         else:
             self._end = None
         if "previous" in api_result:
@@ -85,15 +85,15 @@ class Task:
                                  for ar in api_result["linkTarget"]]
         else:
             self._link_target = None
-        self._created_at = Datetime(api_result["createdAt"])
-        self._updated_at = Datetime(api_result["updatedAt"])
+        self._created_at = datetime(api_result["createdAt"])
+        self._updated_at = datetime(api_result["updatedAt"])
         if "accepted" in api_result:
-            self._accepted = [(IGN(ign), Datetime(dt))
+            self._accepted = [(IGN(ign), datetime(dt))
                               for (ign, dt) in api_result["accepted"]]
         else:
             self._accepted = None
         if "done" in api_result:
-            self._done = [(GID(ign), Datetime(dt))
+            self._done = [(GID(ign), datetime(dt))
                           for (ign, dt) in api_result["done"]]
         else:
             self._done = None
@@ -171,14 +171,14 @@ class Task:
         return self._portal_id
 
     @property
-    def start(self) -> Datetime:
+    def start(self) -> datetime:
         """
         The date and Time when it starts.
         """
         return self._start
 
     @property
-    def end(self) -> Optional[Datetime]:
+    def end(self) -> Optional[datetime]:
         """
         The date and Time when it ends.
         """
@@ -235,28 +235,28 @@ class Task:
         return self._link_target
 
     @property
-    def created_at(self) -> Datetime:
+    def created_at(self) -> datetime:
         """
          When it was created.
         """
         return self._created_at
 
     @property
-    def updated_at(self) -> Datetime:
+    def updated_at(self) -> datetime:
         """
          When it was updated.
         """
         return self._updated_at
 
     @property
-    def accepted(self) -> Optional[List[Tuple(IGN, Datetime)]]:  # CHECKEAR
+    def accepted(self) -> Optional[List]:  # CHECKEAR
         """
          Who accepted this task.
         """
         return self._accepted
 
     @property
-    def done(self) -> Optional[List[Tuple(IGN, Datetime)]]:  # CHECKEAR
+    def done(self) -> Optional[List]:  # CHECKEAR
         """
          Who completed this task.
         """
