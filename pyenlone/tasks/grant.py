@@ -13,6 +13,11 @@ class GrantType(Enum):
     VLEVEL = "vlevel"
     ROCKSEVENT = "rocksevent"
 
+class PermissionType(Enum):
+    MEMBER = "m"
+    READ = "r"
+    WRITE = "w"
+    
 
 class Grant:
     def __init__(self, api_res):
@@ -26,7 +31,7 @@ class Grant:
         elif self.type == GrantType.VLEVEL:
             self._id = VLevel(api_res["id"])
         self._permission = Permission(api_res["permission"])
-        
+
         if "role" in api_res:
             if self.type == GrantType.VTEAM:
                 self._role = RoleType(api_res["role"])
@@ -34,7 +39,7 @@ class Grant:
                 self._role = api_res["role"]
         else:
             self._role = None
-        
+
         if "team" in api_res:
             self._team = api_res["team"]
         else:

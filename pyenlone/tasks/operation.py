@@ -3,12 +3,15 @@ from datetime import datetime
 from typing import Optional, List, Tuple, Dict, NewType
 
 from ..v import IGN
-from .task import Task, TaskType
+from .task import Task, TaskType, TaskID
 from .message import MessageID
 
 OpID = NewType("OpID", int)
 Draw = NewType("Draw", str)
+Arcs = NewType("Arcs", str)
 Bookmark = NewType("Bookmark", str)
+Linkplan = NewType("Linkplan", str)
+Keyplan = NewType("Keyplan", str)
 LatLng = NewType("LatLng", str)
 
 
@@ -22,6 +25,14 @@ class OpType(Enum):
 
 
 class Operation:
+    """
+    A Tasks API operation. Don't create operations manually, get them with
+        Tasks.new_operation
+        Tasks.get_operations
+        Tasks.search_operations
+    """
+    @classmethod
+    def params_fixer(params)
     def __init__(self, proxy, api_result):
         self._proxy = proxy
 
@@ -31,16 +42,16 @@ class Operation:
     def _from_api(self, api_result):
         self._name = IGN(api_result["name"])
         self._owner = api_result["owner"]
-        self._start = datetime(api_result["start"])
+        self._start = datetime.fromtimestamp(api_result["start"] / 1000)
         if "end" in api_result:
-            self._end = datetime(api_result["end"])
+            self._end = datetime.fromtimestamp(api_result["end"] / 1000)
         else:
             self._end = None
         self._type = OpType(api_result["type"])
         if "agentDraw" in api_result:
             self._agent_draw = Draw(api_result["agentDraw"])
         else:
-            self.agent_draw = None
+            self._agent_draw = None
         if "draw" in api_result:
             self._draw = Draw(api_result["draw"])
         else:
@@ -53,6 +64,10 @@ class Operation:
             self._linkplan = api_result["linkplan"]
         else:
             self._linkplan = None
+        if "keyplan" in api_result:
+            self._keyplan = api_result["linkplan"]
+        else:
+            self._keyplan = None
         if "opsbf_settings" in api_result:
             self._opsbf_settings = api_result["opsbf_settings"]
         else:
@@ -93,13 +108,12 @@ class Operation:
             self._sw = LatLng(api_result["sw"])
         else:
             self._sw = None
+
     def _to_api(self):
         return {
-            "id": self._id,
             "name": self._name,
-            "owner": self._owner,
-            "start": self._start,  # CHEKEAR: capaz haya que convertir aca
-            "end": self._end,
+            "start": self._start.timestamp() * 1000,
+            "end": self._end.timestamp() * 1000 if self._end else None,
             "type": self._type.value,
             "agentDraw": self._agent_draw,
             "draw": self._draw,
@@ -117,7 +131,7 @@ class Operation:
             "se": self._se,
             "sw": self._sw
         }
-        
+
     @property
     def id(self) -> int:
         """
@@ -176,6 +190,10 @@ class Operation:
         return self._draw
 
     @property
+    def arcs(self) -> Arcs:
+        pass
+
+    @property
     def bookmark(self) -> Bookmark:
         """
          The bookmarks for that operation. Only visible to Owner and Operator!
@@ -183,14 +201,14 @@ class Operation:
         return self._bookmark
 
     @property
-    def linkplan(self) -> str:
+    def linkplan(self) -> Linkplan:
         """
          The draw for that operation. Only visible to Owner and Operator!
         """
         return self._linkplan
 
     @property
-    def keyplan(self) -> str:
+    def keyplan(self) -> Keyplan:
         """
          The keyplan for that operation. Only visible to Owner and Operator!
         """
@@ -220,12 +238,12 @@ class Operation:
         return self._other
 
     @property
-    def displayOrder(self) -> List:
+    def display_order(self) -> List:
         """
          Array of task IDs as integers to indicate the order the tasks should
          be displayed in clients.
         """
-        return self._displayOrder
+        return self._display_order
 
     @property
     def glympse(self) -> str:
@@ -237,11 +255,11 @@ class Operation:
         return self._glympse
 
     @property
-    def statusTag(self) -> str:
+    def status_tag(self) -> str:
         """
          The tag for that operation, to share location in this operation.
         """
-        return self._statusTag
+        return self._status_tag
 
     @property
     def ne(self) -> LatLng:
@@ -271,9 +289,85 @@ class Operation:
         """
         return self._sw
 
+    @name.setter
+    def name(self, value: str):
+        self._name = value
+
+    @start.setter
+    def start(self, value: datetime):
+        self._start = value
+
+    @end.setter
+    def end(self, value: datetime):
+        self._end = value
+
+    @type.setter
+    def type(self, value: OpType):
+        self._type = value
+
+    @agent_draw.setter
+    def agent_draw(self, value: Draw):
+        self._agent_draw = value
+
+    @draw.setter
+    def draw(self, value: Draw):
+        self._draw = value
+
+    @bookmark.setter
+    def bookmark(self, value: Bookmark):
+        self._bookmark = value
+
+    @linkplan.setter
+    def linkplan(self, value: Linkplan):
+        self._linkplan = value
+
+    @keyplan.setter
+    def keyplan(self, value: Keyplan):
+        self._keyplan = value
+
+    @opsbf_settings.setter
+    def opsbf_settings(self, value):
+        self._opsbf_settings = value
+
+    @opsbf_save.setter
+    def opsbf_save(self, value):
+        self._opsbf_save = value
+
+    @other.setter
+    def other(self, value: Dict):
+        self._other = value
+
+    @display_order.setter
+    def display_order(self, value: List[TaskID]):
+        self._display_order = value
+
+    @glympse.setter
+    def glympse(self, value: str):
+        self._glympse = value
+
+    @status_tag.setter
+    def status_tag(self, value: str):
+        self._status_tag = value
+
+    @ne.setter
+    def ne(self, value: LatLng):
+        self._ne = value
+
+    @nw.setter
+    def nw(self, value: LatLng):
+        self._nw = value
+
+    @ne.setter
+    def ne(self, value: LatLng):
+        self._ne = value
+
+    @nw.setter
+    def nw(self, value: LatLng):
+        self._nw = value
+
     def _base_url(self):
         return "/op/" + str(self.id)
-        
+
     def save(self):
         """
         Save all changes to Tasks server.
@@ -291,52 +385,61 @@ class Operation:
         Delete this operation.
         Also deletes all tasks, messages and grants.
         """
-        self._proxy.delete(self._proxy.get(self._base_url()))
+        self._proxy.delete(self._base_url())
 
-    def new_task(self, lat: float, lon: float, todo: TaskType, **params) -> Task:
+    def new_task(self, name: str, lat: float, lon: float, todo: TaskType, **params) -> Task:
         """
         Add a new task.
         Requires parameters are location and type.
         Aditional initializing parameters can be set in keyword arguments.
         """
+        params["name"] = name
         params["lat"] = lat
         params["lon"] = lon
-        params["todo"] = TaskType.value
+        params["todo"] = todo.value
+        if "portal_id" in params:
+            params["portalID"] = params["portal_id"]
+        if "link_target" in params:
+            params["linkTarget"] = params["link_target"]
+        if "group_name" in params:
+            params["groupName"] = params["group_name"]
+        if "portal_image" in params:
+            params["portalImage"] = params["portal_image"]
         api_res = self._proxy.post(self._base_url() + "/task", params)
-        return Task(self.proxy, api_res)
+        return Task(self._proxy, api_res)
 
-    def bulk_new_task(self, tasks: Tuple) -> List[Task]:
+    def bulk_new_task(self, tasks: List[Dict]) -> List[Task]:
         """
         Bulk add new tasks.
+        Parameter is a list of dictionaries with the parameters of each task.
+        Each one must have al least lat, lon, type and name.
         """
-        pass
+        for task in tasks:
+            if "portal_id" in task:
+                task["portalID"] = task["portal_id"]
+            if "link_target" in task:
+                task["linkTarget"] = task["link_target"]
+            if "group_name" in task:
+                task["groupName"] = task["group_name"]
+            if "portal_image" in task:
+                task["portalImage"] = task["portal_image"]
+            task["todo"] = task["todo"].value
+        return [Task(self._proxy, api_res) for api_res
+                in self._proxy.post(self._base_url() + "/task", tasks)]
 
     def get_task(self, id):
         """
         Retrieve specific task.
         """
-        return Task(self._proxy(self._base_url() + "/task/" + str(id)))
+        return Task(self._proxy, self._proxy.get(self._base_url() + "/task/" + str(id))[0])
 
     def get_tasks(self, **filters) -> List[Task]:
         """
         Retrieve all task of this operation the user can see.
         Aditional search filters can be queried using the keyword arguments.
         """
-        return [Task(api_res) for api_res
-                in self._proxy(self._base_url() + "/tasks")]
-
-    def search_tasks(self, lat, lon, km, **filters) -> List[Task]:
-        """
-        Find all tasks in a radius of km from lat/lon visible to the user.
-        Aditional search filters can be queried using the keyword arguments.
-        """
-        return [Task(api_res) for api_res
-                in self._proxy(self._base_url()
-                               + "/tasks/search"
-                               + "/" + str(lat)
-                               + "/" + str(lon)
-                               + "/" + str(km),
-                               filters)]
+        return [Task(self._proxy, api_res) for api_res
+                in self._proxy.get(self._base_url() + "/task")]
 
     def add_grant(self):
         """
@@ -367,7 +470,7 @@ class Operation:
         Post new message to the op-chat.
         """
         pass
-        
+
     def get_message(self, message_id):
         """
         Retrieve a specific message.
@@ -380,7 +483,7 @@ class Operation:
         Retrieve up to 50 messages, add offset to query more
         """
         pass
-        
+
     def get_users(self):
         """
         Returns Array of agents with permissions.

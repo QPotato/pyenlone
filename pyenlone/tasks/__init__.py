@@ -2,14 +2,14 @@
 Implements Tasks API methods.
 More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 """
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 from .operation import Operation, OpID, OpType
 from .task import Task, TaskID, TaskType, PortalID
 from .message import Message, MessageID
 from .grant import Grant
 from .._proxy import TokenProxy, KeyProxy
-
+from ..enloneexception import NotImplementedByBackendException
 
 __all__ = ["Operation", "OpID", "OpType", "Task", "TaskID", "PortalID", "Message", "MessageID", "Grant"]
 
@@ -41,7 +41,7 @@ class Tasks:
         """
          Retrive Operation.
         """
-        return Operation(self._proxy, self._proxy.get("/op/" + id))
+        return Operation(self._proxy, self._proxy.get("/op/" + str(id)))
 
     def get_operations(self, **filters) -> List[Operation]:
         """
@@ -57,10 +57,17 @@ class Tasks:
          Aditional initializing arguments can be passes in keyword arguments.
         """
         params["name"] = name
-        params["optype"] = op_type.value
+        params["type"] = op_type.value
+        if "agent_draw" in params:
+            params["agentDraw"] = params["agent_draw"]
+        if "display_order" in params:
+            params["displayOrder"] = params["agent_draw"]
+        if "status_tag" in params:
+            params["statusTag"] = params["status_tag"]
+
         return Operation(self._proxy, self._proxy.post("/op", params))
 
-    def search_operations(lat: float, lon: float, km: int, **filters) -> List[Operation]:
+    def search_operations(self, lat: float, lon: float, km: int, **filters) -> List[Operation]:
         """
         Find all operations with tasks in a radius of km from lat/lon visible
         to the user.
@@ -82,12 +89,13 @@ class Tasks:
                 in self._proxy.get("/tasks", filters)]
 
 
-    def search_tasks(lat: float, lon: float, km: float) -> List[Task]:
+    def search_tasks(self, lat: float, lon: float, km: float, **filters) -> List[Task]:
         """
         Find all tasks in a radius of km from lat/lon visible to the user,
         from all operations.
         Aditional search filters can be passed in keyword arguments.
         """
+        raise NotImplementedByBackendException
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get("/tasks/search"
                                    + "/" + str(lat)

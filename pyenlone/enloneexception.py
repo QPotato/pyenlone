@@ -12,3 +12,6 @@ class EnlOneException(Exception):
     but all will inherit from this one, so it's safe to test against it.
     """
     pass
+
+class NotImplementedByBackendException(EnlOneException):
+    pass

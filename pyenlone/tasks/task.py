@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import Optional, List, Tuple, NewType
+from typing import Optional, List, NewType
 
-from ..v import IGN, GID
+from ..v import GID
 
 OpID = NewType("OpID", int)
 TaskID = NewType("TaskID", int)
@@ -10,7 +10,7 @@ PortalID = NewType("PortalID", str)
 
 
 class TaskType(Enum):
-    DESRTOY = 1
+    DESTROY = 1
     CAPTRURE = 2
     FLIP = 4
     LINK = 8
@@ -29,15 +29,29 @@ class TaskStatus(Enum):
 
 class LinkTarget:
     def __init__(self, api_result):
+        # api_result = json.loads(api_result)
         self.name = api_result["name"]
         self.portal_id = PortalID(api_result["portalID"])
         self.lat = api_result["lat"]
         self.lon = api_result["lon"]
 
+    def to_api(self):
+        return {
+            "name": self.name,
+            "portalID": self.portal_id,
+            "lat": self.lat,
+            "lon": self.lon
+        }
+
 
 class Task:
-    def __init__(self, api_result):
+    def __init__(self, proxy, api_result):
+        self._proxy = proxy
+
         self._id = api_result["id"]
+        self._from_api(api_result)
+
+    def _from_api(self, api_result):
         self._op = OpID(api_result["op"])
         if "name" in api_result:
             self._name = api_result["name"]
@@ -58,9 +72,9 @@ class Task:
             self._comment = api_result["comment"]
         else:
             self._comment = None
-        self._start = datetime(api_result["start"])
+        self._start = datetime.fromtimestamp(api_result["start"] / 1000)
         if "end" in api_result:
-            self._end = datetime(api_result["end"])
+            self._end = datetime.fromtimestamp(api_result["end"] / 1000)
         else:
             self._end = None
         if "previous" in api_result:
@@ -85,16 +99,16 @@ class Task:
                                  for ar in api_result["linkTarget"]]
         else:
             self._link_target = None
-        self._created_at = datetime(api_result["createdAt"])
-        self._updated_at = datetime(api_result["updatedAt"])
+        self._created_at = datetime.fromtimestamp(api_result["createdAt"] / 1000)
+        self._updated_at = datetime.fromtimestamp(api_result["updatedAt"] / 1000)
         if "accepted" in api_result:
-            self._accepted = [(IGN(ign), datetime(dt))
-                              for (ign, dt) in api_result["accepted"]]
+            self._accepted = [(GID(ar["user"]), datetime.fromtimestamp(ar["time"] / 1000))
+                              for ar in api_result["accepted"]]
         else:
             self._accepted = None
         if "done" in api_result:
-            self._done = [(GID(ign), datetime(dt))
-                          for (ign, dt) in api_result["done"]]
+            self._done = [(GID(ar["user"]), datetime.fromtimestamp(ar["time"] / 1000))
+                          for ar in api_result["done"]]
         else:
             self._done = None
         if "assigned" in api_result:
@@ -113,6 +127,35 @@ class Task:
             self.portal_image = api_result["portalImage"]
         else:
             self._portal_image = None
+
+        def _to_api(self):
+            return {
+                "name": self._name,
+                "lat": self._lat,
+                "lon": self._lon,
+                "portal": self._portal,
+                "portalID": self._portal_id,
+                "start": self._start.timestamp() * 1000,
+                "end": self._end.timestamp() * 1000 if self._end else None,
+                "comment": self._comment,
+                "previous": self._previous,
+                "alternative": self._alternative,
+                "priority": self._priority,
+                "repeat": self._repeat,
+                "todo": self._todo.value,
+                "linkTarget": [lt.to_api() for lt
+                               in self._link_target.to_api()]
+                              if self._link_target else None,
+                "createdAt": self._created_at,
+                "updatedAt": self._updated_at,
+                "accepted": self._accepted,
+                "done": [{"user": dn[0], "time": dn[1]}
+                         for dn in self._done] if self._done else None,
+                "assigned": self._assigned,
+                "groupName": self._group_name,
+                "status": self._status,
+                "portalimage": self._portal_image,
+            }
 
     @property
     def id(self) -> TaskID:
@@ -136,9 +179,9 @@ class Task:
         return self._name
 
     @property
-    def owner(self) -> IGN:
+    def owner(self) -> GID:
         """
-        Google ID.
+         Google ID.
         """
         return self._owner
 
@@ -294,9 +337,93 @@ class Task:
         """
         return self._portal_image
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    @lat.setter
+    def lat(self, value):
+        self._lat = value
+
+    @lon.setter
+    def lon(self, value):
+        self._lon = value
+
+    @portal.setter
+    def portal(self, value):
+        self._portal = value
+
+    @portal_id.setter
+    def portal_id(self, value):
+        self._portal_id = value
+
+    @start.setter
+    def start(self, value):
+        self._start = value
+
+    @end.setter
+    def end(self, value):
+        self._end = value
+
+    @comment.setter
+    def comment(self, value):
+        self._comment = value
+
+    @previous.setter
+    def previous(self, value):
+        self._previous = value
+
+    @alternative.setter
+    def alternative(self, value):
+        self._alternative = value
+
+    @priority.setter
+    def priority(self, value):
+        self._priority = value
+
+    @repeat.setter
+    def repeat(self, value):
+        self._repeat = value
+
+    @todo.setter
+    def todo(self, value):
+        self._todo = value
+
+    @created_at.setter
+    def created_at(self, value):
+        self._created_at = value
+
+    @updated_at.setter
+    def updated_at(self, value):
+        self._updated_at = value
+
+    @accepted.setter
+    def accepted(self, value):
+        self._accepted = value
+
+    @done.setter
+    def done(self, value):
+        self._done = value
+
+    @assigned.setter
+    def assigned(self, value):
+        self._assigned = value
+
+    @group_name.setter
+    def group_name(self, value):
+        self._group_name = value
+
+    @status.setter
+    def status(self, value):
+        self._status = value
+
+    @portal_image.setter
+    def portal_image(self, value):
+        self._portal_image = value
+
     def _base_url(self):
         return "/op/" + str(self.op) + "/task/" + str(self.id)
-          
+
     def save(self):
         """
         Save changes to Tasks server.
@@ -314,7 +441,7 @@ class Task:
         Delete this task.
         Also deletes task specific grants.
         """
-        self._proxy.put(self._base_url())
+        self._proxy.delete(self._base_url())
 
     def add_grant(self):
         """
@@ -381,4 +508,3 @@ class Task:
         Unassign task.
         """
         self._proxy.post(self._base_url() + "/assigned")
-
