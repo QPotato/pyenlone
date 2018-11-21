@@ -65,15 +65,18 @@ class KeyProxy(Proxy):
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
 
-    def post(self, endpoint, json):
+    def post(self, endpoint, data):
         """
         Do a post request adding the apikey as a parameter.
         """
         url = self._base_url + endpoint
         try:
+            import json; print(json.dumps(data));
             response = self._session.post(url,
                                           params={"apikey": self._apikey},
-                                          json=json)
+                                          json=data)
+            print(response.url)
+            import json; print(json.dumps(data));
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)

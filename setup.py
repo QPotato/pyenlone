@@ -13,7 +13,7 @@ setuptools.setup(
     url="https://gitlab.com/potato-tools/pyenlone",
     packages=setuptools.find_packages(),
     install_requires=[
-          'requests',
+          'requests>=2.4',
           'requests_cache',
       ],
     classifiers=[

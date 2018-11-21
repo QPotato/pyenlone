@@ -9,6 +9,21 @@ TaskID = NewType("TaskID", int)
 PortalID = NewType("PortalID", str)
 
 
+def _fix_task_params(params):
+    if "todo" in params:
+        params["todo"] = params["todo"].value
+    if "portal_id" in params:
+        params["portalID"] = params["portal_id"]
+    if "link_target" in params:
+        params["linkTarget"] = params["link_target"]
+        if type(params["linkTarget"]) is dict:
+            params["linkTarget"] = [params["linkTarget"]]
+    if "group_name" in params:
+        params["groupName"] = params["group_name"]
+    if "portal_image" in params:
+        params["portalImage"] = params["portal_image"]
+
+
 class TaskType(Enum):
     DESTROY = 1
     CAPTRURE = 2
@@ -355,14 +370,14 @@ class Task:
 
     @portal_id.setter
     def portal_id(self, value):
-        self._portal_id = value
+        self._portal_id = PortalID(value)
 
     @start.setter
-    def start(self, value):
+    def start(self, value: datetime):
         self._start = value
 
     @end.setter
-    def end(self, value):
+    def end(self, value: datetime):
         self._end = value
 
     @comment.setter
@@ -371,11 +386,11 @@ class Task:
 
     @previous.setter
     def previous(self, value):
-        self._previous = value
+        self._previous = TaskID(value)
 
     @alternative.setter
     def alternative(self, value):
-        self._alternative = value
+        self._alternative = TaskID(value)
 
     @priority.setter
     def priority(self, value):
@@ -386,24 +401,8 @@ class Task:
         self._repeat = value
 
     @todo.setter
-    def todo(self, value):
+    def todo(self, value: TaskType):
         self._todo = value
-
-    @created_at.setter
-    def created_at(self, value):
-        self._created_at = value
-
-    @updated_at.setter
-    def updated_at(self, value):
-        self._updated_at = value
-
-    @accepted.setter
-    def accepted(self, value):
-        self._accepted = value
-
-    @done.setter
-    def done(self, value):
-        self._done = value
 
     @assigned.setter
     def assigned(self, value):
@@ -414,7 +413,7 @@ class Task:
         self._group_name = value
 
     @status.setter
-    def status(self, value):
+    def status(self, value: TaskStatus):
         self._status = value
 
     @portal_image.setter

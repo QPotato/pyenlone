@@ -4,8 +4,8 @@ More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 """
 from typing import List, Optional
 
-from .operation import Operation, OpID, OpType, _fix_task_params
-from .task import Task, TaskID, TaskType, PortalID
+from .operation import Operation, OpID, OpType, _fix_op_params
+from .task import Task, TaskID, TaskType, PortalID, _fix_task_params
 from .message import Message, MessageID
 from .grant import Grant
 from .._proxy import TokenProxy, KeyProxy
@@ -15,16 +15,6 @@ __all__ = ["Operation", "OpID", "OpType",
            "Task", "TaskID",  "TaskType", "PortalID",
            "Message", "MessageID", "Grant", "Tasks"]
 
-
-def _fix_op_params(params):
-    if "type" in params:
-        params["type"] = params["type"].value
-    if "agent_draw" in params:
-        params["agentDraw"] = params["agent_draw"]
-    if "display_order" in params:
-        params["displayOrder"] = params["agent_draw"]
-    if "status_tag" in params:
-        params["statusTag"] = params["status_tag"]
 
 class Tasks:
     def __init__(self,
@@ -48,7 +38,7 @@ class Tasks:
             self._proxy = TokenProxy(url + "/gapi", "Google " + token, cache=cache)
         elif firebase:
             self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + token, cache=cache)
-            
+
     def get_operation(self, id: OpID):
         """
          Retrive Operation.

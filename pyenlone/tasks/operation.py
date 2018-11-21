@@ -1,9 +1,9 @@
 from enum import Enum
 from datetime import datetime
-from typing import Optional, List, Tuple, Dict, NewType
+from typing import Optional, List, Dict, NewType
 
 from ..v import IGN
-from .task import Task, TaskType, TaskID
+from .task import Task, TaskType, TaskID, _fix_task_params
 from .message import MessageID
 
 OpID = NewType("OpID", int)
@@ -14,16 +14,17 @@ Linkplan = NewType("Linkplan", str)
 Keyplan = NewType("Keyplan", str)
 LatLng = NewType("LatLng", str)
 
-def _fix_task_params(params):
-    params["todo"] = todo.value
-    if "portal_id" in params:
-        params["portalID"] = params["portal_id"]
-    if "link_target" in params:
-        params["linkTarget"] = params["link_target"]
-    if "group_name" in params:
-        params["groupName"] = params["group_name"]
-    if "portal_image" in params:
-        params["portalImage"] = params["portal_image"]
+
+def _fix_op_params(params):
+    if "type" in params:
+        params["type"] = params["type"].value
+    if "agent_draw" in params:
+        params["agentDraw"] = params["agent_draw"]
+    if "display_order" in params:
+        params["displayOrder"] = params["agent_draw"]
+    if "status_tag" in params:
+        params["statusTag"] = params["status_tag"]
+
 
 class OpType(Enum):
     FIELD = "field"
@@ -32,6 +33,7 @@ class OpType(Enum):
     LINKSTAR = "linkstar"
     LINKART = "linkart"
     OTHER = "other"
+
 
 class Operation:
     """
@@ -403,6 +405,7 @@ class Operation:
         params["name"] = name
         params["lat"] = lat
         params["lon"] = lon
+        params["todo"] = todo
         _fix_task_params(params)
         api_res = self._proxy.post(self._base_url() + "/task", params)
         return Task(self._proxy, api_res)
@@ -476,7 +479,6 @@ class Operation:
         Retrieve a specific message.
         """
         pass
-
 
     def get_messages(self, offset=0):
         """

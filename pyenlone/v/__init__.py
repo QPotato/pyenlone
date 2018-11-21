@@ -20,7 +20,7 @@ from .team import Team, TeamRole, RoleType, TeamID
 from .team_member import TeamMember
 from ..enloneexception import EnlOneException
 
-__all__ = ["Agent", "IGN", "GID", "VLevel","DetailAgent",
+__all__ = ["Agent", "IGN", "GID", "VLevel", "DetailAgent",
            "Team", "TeamID", "TeamMember", "TeamRole", "RoleType",
            "V", "banned"]
 
