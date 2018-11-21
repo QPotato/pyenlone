@@ -4,15 +4,27 @@ More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 """
 from typing import List, Optional
 
-from .operation import Operation, OpID, OpType
+from .operation import Operation, OpID, OpType, _fix_task_params
 from .task import Task, TaskID, TaskType, PortalID
 from .message import Message, MessageID
 from .grant import Grant
 from .._proxy import TokenProxy, KeyProxy
 from ..enloneexception import NotImplementedByBackendException
 
-__all__ = ["Operation", "OpID", "OpType", "Task", "TaskID", "PortalID", "Message", "MessageID", "Grant"]
+__all__ = ["Operation", "OpID", "OpType",
+           "Task", "TaskID",  "TaskType", "PortalID",
+           "Message", "MessageID", "Grant", "Tasks"]
 
+
+def _fix_op_params(params):
+    if "type" in params:
+        params["type"] = params["type"].value
+    if "agent_draw" in params:
+        params["agentDraw"] = params["agent_draw"]
+    if "display_order" in params:
+        params["displayOrder"] = params["agent_draw"]
+    if "status_tag" in params:
+        params["statusTag"] = params["status_tag"]
 
 class Tasks:
     def __init__(self,
@@ -36,7 +48,7 @@ class Tasks:
             self._proxy = TokenProxy(url + "/gapi", "Google " + token, cache=cache)
         elif firebase:
             self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + token, cache=cache)
-
+            
     def get_operation(self, id: OpID):
         """
          Retrive Operation.
@@ -47,6 +59,7 @@ class Tasks:
         """
          Get all operations user is owner, operator or can see.
         """
+        _fix_op_params(filters)
         return [Operation(self._proxy, api_res) for api_res
                 in self._proxy.get("/ops", filters)]
 
@@ -57,14 +70,8 @@ class Tasks:
          Aditional initializing arguments can be passes in keyword arguments.
         """
         params["name"] = name
-        params["type"] = op_type.value
-        if "agent_draw" in params:
-            params["agentDraw"] = params["agent_draw"]
-        if "display_order" in params:
-            params["displayOrder"] = params["agent_draw"]
-        if "status_tag" in params:
-            params["statusTag"] = params["status_tag"]
-
+        params["type"] = op_type
+        _fix_op_params(params)
         return Operation(self._proxy, self._proxy.post("/op", params))
 
     def search_operations(self, lat: float, lon: float, km: int, **filters) -> List[Operation]:
@@ -73,6 +80,7 @@ class Tasks:
         to the user.
         Aditional search filters can be passed in keyword arguments.
         """
+        _fix_op_params(filters)
         return [Operation(self._proxy, api_res) for api_res
                 in self._proxy.get("/ops/search"
                                    + "/" + str(lat)
@@ -85,6 +93,7 @@ class Tasks:
         Retrieve all tasks visible to the user,
         from all operations.
         """
+        _fix_task_params(filters)
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get("/tasks", filters)]
 
@@ -95,6 +104,7 @@ class Tasks:
         from all operations.
         Aditional search filters can be passed in keyword arguments.
         """
+        _fix_task_params(filters)
         raise NotImplementedByBackendException
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get("/tasks/search"

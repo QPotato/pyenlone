@@ -20,8 +20,9 @@ from .team import Team, TeamRole, RoleType, TeamID
 from .team_member import TeamMember
 from ..enloneexception import EnlOneException
 
-__all__ = ["Agent", "DetailAgent", "Team", "TeamID", "TeamMember", "TeamRole", "RoleType",  "V",
-           "banned", "IGN", "GID", "VLevel"]
+__all__ = ["Agent", "IGN", "GID", "VLevel","DetailAgent",
+           "Team", "TeamID", "TeamMember", "TeamRole", "RoleType",
+           "V", "banned"]
 
 
 def banned(gid: str):

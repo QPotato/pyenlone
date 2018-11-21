@@ -14,6 +14,16 @@ Linkplan = NewType("Linkplan", str)
 Keyplan = NewType("Keyplan", str)
 LatLng = NewType("LatLng", str)
 
+def _fix_task_params(params):
+    params["todo"] = todo.value
+    if "portal_id" in params:
+        params["portalID"] = params["portal_id"]
+    if "link_target" in params:
+        params["linkTarget"] = params["link_target"]
+    if "group_name" in params:
+        params["groupName"] = params["group_name"]
+    if "portal_image" in params:
+        params["portalImage"] = params["portal_image"]
 
 class OpType(Enum):
     FIELD = "field"
@@ -23,7 +33,6 @@ class OpType(Enum):
     LINKART = "linkart"
     OTHER = "other"
 
-
 class Operation:
     """
     A Tasks API operation. Don't create operations manually, get them with
@@ -31,8 +40,6 @@ class Operation:
         Tasks.get_operations
         Tasks.search_operations
     """
-    @classmethod
-    def params_fixer(params)
     def __init__(self, proxy, api_result):
         self._proxy = proxy
 
@@ -396,15 +403,7 @@ class Operation:
         params["name"] = name
         params["lat"] = lat
         params["lon"] = lon
-        params["todo"] = todo.value
-        if "portal_id" in params:
-            params["portalID"] = params["portal_id"]
-        if "link_target" in params:
-            params["linkTarget"] = params["link_target"]
-        if "group_name" in params:
-            params["groupName"] = params["group_name"]
-        if "portal_image" in params:
-            params["portalImage"] = params["portal_image"]
+        _fix_task_params(params)
         api_res = self._proxy.post(self._base_url() + "/task", params)
         return Task(self._proxy, api_res)
 
@@ -438,6 +437,7 @@ class Operation:
         Retrieve all task of this operation the user can see.
         Aditional search filters can be queried using the keyword arguments.
         """
+        _fix_task_params(filters)
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get(self._base_url() + "/task")]
 
