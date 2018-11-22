@@ -12,3 +12,17 @@ class EnlOneException(Exception):
     but all will inherit from this one, so it's safe to test against it.
     """
     pass
+
+
+class NotImplementedByBackendException(EnlOneException):
+    """
+    Raised by placeholder method still not implemeted by the backend.
+    """
+    pass
+
+
+class PyEnlOneNotImplementedException(EnlOneException):
+    """
+    Raised by placeholder method still not implemeted by the backend.
+    """
+    pass

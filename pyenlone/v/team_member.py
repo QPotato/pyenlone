@@ -21,3 +21,10 @@ class TeamMember(DetailAgent):
     @property
     def roles(self) -> List[TeamRole]:
         return self._roles
+
+    @property
+    def distance(self) -> int:
+        """
+        Radius of action in km.
+        """
+        return self._distance
