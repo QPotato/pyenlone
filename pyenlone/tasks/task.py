@@ -73,6 +73,9 @@ class TaskStatus(Enum):
 
 class Task:
     def __init__(self, proxy, api_result):
+        """
+        Don't create tasks using this contructor, use Operation.new_task
+        """
         self._proxy = proxy
         self._api_repr = api_result
 

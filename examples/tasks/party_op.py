@@ -1,5 +1,6 @@
 """
-Example showing how to create operations, create tasks and assign them.
+Integral example.
+You need to put a valid V apikey in a file called APIKEY.
 """
 from datetime import datetime
 

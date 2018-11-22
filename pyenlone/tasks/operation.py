@@ -46,6 +46,9 @@ class Operation:
         Tasks.search_operations
     """
     def __init__(self, proxy, api_result):
+        """
+        Don't create operations using this contructor, use Tasks.new_operation
+        """
         self._proxy = proxy
         self._api_repr = api_result
 
@@ -362,7 +365,8 @@ class Operation:
         """
         self._proxy.delete(self._base_url())
 
-    def new_task(self, name: str, lat: float, lon: float, todo: TaskType, **params) -> Task:
+    def new_task(self, name: str, lat: float, lon: float, todo: TaskType,
+                 **params) -> Task:
         """
         Add a new task.
         Requires parameters are location and type.
@@ -393,7 +397,8 @@ class Operation:
         """
         Retrieve specific task.
         """
-        return Task(self._proxy, self._proxy.get(self._base_url() + "/task/" + str(id))[0])
+        return Task(self._proxy,
+                    self._proxy.get(self._base_url() + "/task/" + str(id))[0])
 
     def get_tasks(self, **filters) -> List[Task]:
         """
@@ -438,10 +443,14 @@ class Operation:
         """
         Retrieve a specific message.
         """
-        return self._proxy.get(self._base_url() + "/messages/" + str(message_id))
+        return self._proxy.get(self._base_url()
+                               + "/messages/"
+                               + str(message_id))
 
     def edit_message(self, message_id, edit):
-        return self._proxy.put(self._base_url() + "/messages/" + str(message_id),
+        return self._proxy.put(self._base_url()
+                               + "/messages/"
+                               + str(message_id),
                                edit)
 
     def get_messages(self, offset=0):

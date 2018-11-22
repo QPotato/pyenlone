@@ -1,3 +1,6 @@
+"""
+Example showing how to search tasks by agent location and distance.
+"""
 from pyenlone.tasks import TaskStatus, Tasks
 from pyenlone.v import V
 

@@ -123,7 +123,6 @@ class TokenProxy(Proxy):
         headers = {'Authorization': self._token}
         try:
             response = self._session.get(url, headers=headers, params=params)
-            print(response.url)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)

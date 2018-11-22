@@ -1,10 +1,11 @@
-from pyenlone.tasks import *
 """
 Basic example of Tasks.
 Lists the names of all operations and all tasks in them.
 
 You need to put a valid V apikey in a file called APIKEY.
 """
+from pyenlone.tasks import Tasks
+
 with open("APIKEY") as apikey:
     T = Tasks(apikey=apikey.read().strip())
 

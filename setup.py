@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pyenlone",
-    version="0.1.4",
+    version="0.2.0",
     author="QuanticPotato",
     description="A python implementation of enl.one API",
     long_description=long_description,

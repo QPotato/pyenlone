@@ -5,7 +5,8 @@ More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 from typing import List, Optional
 
 from .operation import Operation, OpID, OpType, _fix_op_params
-from .task import Task, TaskID, TaskType, TaskStatus, PortalID, _fix_task_params
+from .task import Task, TaskID, TaskType, TaskStatus, PortalID, \
+                  _fix_task_params
 from .._proxy import TokenProxy, KeyProxy
 from ..enloneexception import NotImplementedByBackendException
 
@@ -34,15 +35,20 @@ class Tasks:
         if apikey:
             self._proxy = KeyProxy(url + "/api", apikey, cache=cache)
         elif voauth:
-            self._proxy = TokenProxy(url + "/oauth", "VOAuth " + voauth, cache=cache)
+            self._proxy = TokenProxy(url + "/oauth",
+                                     "VOAuth " + voauth, cache=cache)
         elif rocks:
-            self._proxy = TokenProxy(url + "/rocks", "Rocks " + rocks, cache=cache)
+            self._proxy = TokenProxy(url + "/rocks",
+                                     "Rocks " + rocks, cache=cache)
         elif enlio:
-            self._proxy = TokenProxy(url + "/enlio", "EnlIO " + enlio, cache=cache)
+            self._proxy = TokenProxy(url + "/enlio",
+                                     "EnlIO " + enlio, cache=cache)
         elif google:
-            self._proxy = TokenProxy(url + "/gapi", "Google " + google, cache=cache)
+            self._proxy = TokenProxy(url + "/gapi",
+                                     "Google " + google, cache=cache)
         elif firebase:
-            self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + firebase, cache=cache)
+            self._proxy = TokenProxy(url + "/firebase",
+                                     "FirebaseJWT " + firebase, cache=cache)
 
     def get_operation(self, id: OpID):
         """
@@ -69,7 +75,8 @@ class Tasks:
         _fix_op_params(params)
         return Operation(self._proxy, self._proxy.post("/op", params))
 
-    def search_operations(self, lat: float, lon: float, km: int, **filters) -> List[Operation]:
+    def search_operations(self, lat: float, lon: float, km: int,
+                          **filters) -> List[Operation]:
         """
         Find all operations with tasks in a radius of km from lat/lon visible
         to the user.
@@ -92,7 +99,8 @@ class Tasks:
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get("/tasks", filters)]
 
-    def search_tasks(self, lat: float, lon: float, km: float, **filters) -> List[Task]:
+    def search_tasks(self, lat: float, lon: float, km: float,
+                     **filters) -> List[Task]:
         """
         Find all tasks in a radius of km from lat/lon visible to the user,
         from all operations.
