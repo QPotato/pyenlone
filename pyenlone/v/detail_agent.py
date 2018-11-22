@@ -29,3 +29,11 @@ class DetailAgent(Agent):
     @property
     def gid(self) -> str:
         return self._gid
+
+    @property
+    def lat(self) -> float:
+        return self._lat
+
+    @property
+    def lon(self) -> float:
+        return self._lon

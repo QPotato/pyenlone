@@ -2,9 +2,9 @@ from enum import Enum
 from datetime import datetime
 from typing import Optional, List, Dict, NewType
 
-from ..v import IGN
-from .task import Task, TaskType, TaskID, _fix_task_params
-from .message import MessageID
+from ..v import IGN, GID
+from ..enloneexception import PyEnlOneNotImplementedException
+from .task import Task, TaskType, TaskID, _fix_task_params, LatLng
 
 OpID = NewType("OpID", int)
 Draw = NewType("Draw", str)
@@ -12,16 +12,19 @@ Arcs = NewType("Arcs", str)
 Bookmark = NewType("Bookmark", str)
 Linkplan = NewType("Linkplan", str)
 Keyplan = NewType("Keyplan", str)
-LatLng = NewType("LatLng", str)
 
 
 def _fix_op_params(params):
     if "type" in params:
         params["type"] = params["type"].value
+    if "start" in params:
+        params["start"] = params["start"].timestamp() * 1000
+    if "end" in params:
+        params["end"] = params["end"].timestamp() * 1000
     if "agent_draw" in params:
         params["agentDraw"] = params["agent_draw"]
     if "display_order" in params:
-        params["displayOrder"] = params["agent_draw"]
+        params["displayOrder"] = params["display_order"]
     if "status_tag" in params:
         params["statusTag"] = params["status_tag"]
 
@@ -44,144 +47,71 @@ class Operation:
     """
     def __init__(self, proxy, api_result):
         self._proxy = proxy
+        self._api_repr = api_result
 
-        self._id = OpID(api_result["id"])
-        self._from_api(api_result)
-
-    def _from_api(self, api_result):
-        self._name = IGN(api_result["name"])
-        self._owner = api_result["owner"]
-        self._start = datetime.fromtimestamp(api_result["start"] / 1000)
-        if "end" in api_result:
-            self._end = datetime.fromtimestamp(api_result["end"] / 1000)
-        else:
-            self._end = None
-        self._type = OpType(api_result["type"])
-        if "agentDraw" in api_result:
-            self._agent_draw = Draw(api_result["agentDraw"])
-        else:
-            self._agent_draw = None
-        if "draw" in api_result:
-            self._draw = Draw(api_result["draw"])
-        else:
-            self._draw = None
-        if "bookmark" in api_result:
-            self._bookmark = Bookmark(api_result["bookmark"])
-        else:
-            self._bookmark = None
-        if "linkplan" in api_result:
-            self._linkplan = api_result["linkplan"]
-        else:
-            self._linkplan = None
-        if "keyplan" in api_result:
-            self._keyplan = api_result["linkplan"]
-        else:
-            self._keyplan = None
-        if "opsbf_settings" in api_result:
-            self._opsbf_settings = api_result["opsbf_settings"]
-        else:
-            self._opsbf_settings = None
-        if "opsbf_save" in api_result:
-            self._opsbf_save = api_result["opsbf_save"]
-        else:
-            self._opsbf_save = None
-        if "other" in api_result:
-            self._other = api_result["other"]
-        else:
-            self._other = None
-        if "displayOrder" in api_result:
-            self._display_order = api_result["displayOrder"]
-        else:
-            self._display_order = None
-        if "glympse" in api_result:
-            self._glympse = api_result["glympse"]
-        else:
-            self._glympse = None
-        if "statusTag" in api_result:
-            self.status_tag = api_result["statusTag"]
-        else:
-            self._status_tag = None
-        if "ne" in api_result:
-            self._ne = LatLng(api_result["ne"])
-        else:
-            self._ne = None
-        if "nw" in api_result:
-            self._nw = LatLng(api_result["nw"])
-        else:
-            self._nw = None
-        if "se" in api_result:
-            self._se = LatLng(api_result["se"])
-        else:
-            self._se = None
-        if "sw" in api_result:
-            self._sw = LatLng(api_result["sw"])
-        else:
-            self._sw = None
-
-    def _to_api(self):
-        return {
-            "name": self._name,
-            "start": self._start.timestamp() * 1000,
-            "end": self._end.timestamp() * 1000 if self._end else None,
-            "type": self._type.value,
-            "agentDraw": self._agent_draw,
-            "draw": self._draw,
-            "bookmark": self._bookmark,
-            "linkplan": self._linkplan,
-            "keyplan": self._keyplan,
-            "opsbf_settings": self._opsbf_settings,
-            "opsbf_save": self._opsbf_save,
-            "other": self._other,
-            "displayOrder": self._display_order,
-            "glympse": self._glympse,
-            "statusTag": self._status_tag,
-            "ne": self._ne,
-            "nw": self._nw,
-            "se": self._se,
-            "sw": self._sw
-        }
+    def __eq__(self, other):
+        return self.id == other.id
 
     @property
     def id(self) -> int:
         """
         ID of the Operation.
         """
-        return self._id
+        return OpID(self._api_repr["id"])
 
     @property
     def name(self) -> Optional[str]:
         """
         Name of the Operation.
         """
-        return self._name
+        return self._api_repr["name"]
+
+    @name.setter
+    def name(self, value: str):
+        self._api_repr["name"] = value
 
     @property
     def owner(self) -> IGN:
         """
         Owner of the operation.
         """
-        return self._owner
+        return GID(self._api_repr["owner"])
 
     @property
     def start(self) -> datetime:
         """
         When the operations starts.
         """
-        return self._start
+        return datetime.fromtimestamp(self._api_repr["start"] / 1000)
+
+    @start.setter
+    def start(self, value: datetime):
+        self._api_repr["start"] = value.timestamp() * 1000
 
     @property
     def end(self) -> Optional[datetime]:
         """
         When the operations ends.
         """
-        return self._end
+        if "end" in self._api_repr:
+            return datetime.fromtimestamp(self._api_repr["end"] / 1000)
+        else:
+            return None
+
+    @end.setter
+    def end(self, value: datetime):
+        self._api_repr["end"] = value.timestamp() * 1000
 
     @property
     def type(self) -> OpType:
         """
         What kind of operation.
         """
-        return self._type
+        return OpType(self._api_repr["type"])
+
+    @type.setter
+    def type(self, value: OpType):
+        self._api_repr["type"] = value.value
 
     @property
     def agent_draw(self) -> Draw:
@@ -189,62 +119,125 @@ class Operation:
         A draw for that operation that is visible to all agents
         with read access.
         """
-        return self._agent_draw
+        if "agentDraw" in self._api_repr:
+            return Draw(self._api_repr["agentDraw"])
+        else:
+            return None
+
+    @agent_draw.setter
+    def agent_draw(self, value: Draw):
+        self._api_repr["agentDraw"] = value
 
     @property
     def draw(self) -> Draw:
         """
          The draw for that operation. Only visible to Owner and Operator!
         """
-        return self._draw
+        if "draw" in self._api_repr:
+            return Draw(self._api_repr["draw"])
+        else:
+            return None
+
+    @draw.setter
+    def draw(self, value: Draw):
+        self._api_repr["draw"] = value
 
     @property
     def arcs(self) -> Arcs:
-        pass
+        """
+         The arcs for this operation. Only visible to Owner and Operator!
+         (I guess?)
+        """
+        if "arcs" in self._api_repr:
+            return Arcs(self._api_repr["arcs"])
+        else:
+            return None
 
     @property
     def bookmark(self) -> Bookmark:
         """
-         The bookmarks for that operation. Only visible to Owner and Operator!
+         The bookmarks for this operation. Only visible to Owner and Operator!
         """
-        return self._bookmark
+        if "bookmark" in self._api_repr:
+            return Bookmark(self._api_repr["bookmark"])
+        else:
+            return None
+
+    @bookmark.setter
+    def bookmark(self, value: Bookmark):
+        self._api_repr["boorkmark"] = value
 
     @property
     def linkplan(self) -> Linkplan:
         """
          The draw for that operation. Only visible to Owner and Operator!
         """
-        return self._linkplan
+        if "linkplan" in self._api_repr:
+            return Linkplan(self._api_repr["linkplan"])
+        else:
+            return None
+
+    @linkplan.setter
+    def linkplan(self, value: Linkplan):
+        self._api_repr["linkplan"] = value
 
     @property
     def keyplan(self) -> Keyplan:
         """
          The keyplan for that operation. Only visible to Owner and Operator!
         """
-        return self._keyplan
+        if "keyplan" in self._api_repr:
+            return Keyplan(self._api_repr["keyplan"])
+        else:
+            return None
+
+    @keyplan.setter
+    def keyplan(self, value: Keyplan):
+        self._api_repr["keyplan"] = value
 
     @property
     def opsbf_settings(self) -> str:
         """
          OPSBF Settings for that operation. Only visible to Owner and Operator!
         """
-        return self._opsbf_settings
+        if "opsbf_settings" in self._api_repr:
+            return self._api_repr["opsbf_settings"]
+        else:
+            return None
+
+    @opsbf_settings.setter
+    def opsbf_settings(self, value):
+        self._api_repr["opsbf_settings"] = value
 
     @property
     def opsbf_save(self) -> str:
         """
          OPSBF Save for that operation. Only visible to Owner and Operator!
         """
-        return self._opsbf_save
+        if "opsbf_save" in self._api_repr:
+            return self._api_repr["opsbf_save"]
+        else:
+            return None
+
+    @opsbf_save.setter
+    def opsbf_save(self, value):
+        self._api_repr["opsbf_save"] = value
 
     @property
     def other(self) -> Dict:
         """
-         More data regarding that operation. An Object (Hash dictionary) with
-         name:value pairs. You can store whatever you want. Only visible to
+         More data regarding that operation. A dictionaryself.
+         You can store whatever you want. Only visible to
          Owner and Operator!
         """
-        return self._other
+        if "other" in self._api_repr:
+            return self._api_repr["other"]
+        else:
+            return None
+
+    @other.setter
+    def other(self, value: Dict):
+        self._api_repr["other"] = value
 
     @property
     def display_order(self) -> List:
@@ -252,7 +245,14 @@ class Operation:
          Array of task IDs as integers to indicate the order the tasks should
          be displayed in clients.
         """
-        return self._display_order
+        if "displayOrder" in self._api_repr:
+            return self._api_repr["displayOrder"]
+        else:
+            return None
+
+    @display_order.setter
+    def display_order(self, value: List[TaskID]):
+        self._api_repr["displayOrder"] = value
 
     @property
     def glympse(self) -> str:
@@ -261,118 +261,84 @@ class Operation:
          link to app: http://glympse.com/!your_group_name
          (always starts with !).
         """
-        return self._glympse
+        if "glympse" in self._api_repr:
+            return self._api_repr["glympse"]
+        else:
+            return None
+
+    @glympse.setter
+    def glympse(self, value: str):
+        self._api_repr["glympse"] = value
 
     @property
     def status_tag(self) -> str:
         """
          The tag for that operation, to share location in this operation.
         """
-        return self._status_tag
+        if "statusTag" in self._api_repr:
+            return self._api_repr["statusTag"]
+        else:
+            return None
+
+    @status_tag.setter
+    def status_tag(self, value: str):
+        self._api_repr["statusTag"] = value
 
     @property
     def ne(self) -> LatLng:
         """
          Area Management - the Box defining the area.
         """
-        return self._ne
+        if "ne" in self._api_repr:
+            return LatLng(self._api_repr["ne"])
+        else:
+            return None
+
+    @ne.setter
+    def ne(self, value: LatLng):
+        self._api_repr["ne"] = value
 
     @property
     def nw(self) -> LatLng:
         """
          Area Management - the Box defining the area.
         """
-        return self._nw
+        if "nw" in self._api_repr:
+            return LatLng(self._api_repr["nw"])
+        else:
+            return None
+
+    @nw.setter
+    def nw(self, value: LatLng):
+        self._api_repr["nw"] = value
 
     @property
     def se(self) -> LatLng:
         """
          Area Management - the Box defining the area.
         """
-        return self._se
+        if "se" in self._api_repr:
+            return LatLng(self._api_repr["se"])
+        else:
+            return None
+
+    @se.setter
+    def se(self, value: LatLng):
+        self._api_repr["se"] = value
 
     @property
     def sw(self) -> LatLng:
         """
          Area Management - the Box defining the area.
         """
-        return self._sw
-
-    @name.setter
-    def name(self, value: str):
-        self._name = value
-
-    @start.setter
-    def start(self, value: datetime):
-        self._start = value
-
-    @end.setter
-    def end(self, value: datetime):
-        self._end = value
-
-    @type.setter
-    def type(self, value: OpType):
-        self._type = value
-
-    @agent_draw.setter
-    def agent_draw(self, value: Draw):
-        self._agent_draw = value
-
-    @draw.setter
-    def draw(self, value: Draw):
-        self._draw = value
-
-    @bookmark.setter
-    def bookmark(self, value: Bookmark):
-        self._bookmark = value
-
-    @linkplan.setter
-    def linkplan(self, value: Linkplan):
-        self._linkplan = value
-
-    @keyplan.setter
-    def keyplan(self, value: Keyplan):
-        self._keyplan = value
-
-    @opsbf_settings.setter
-    def opsbf_settings(self, value):
-        self._opsbf_settings = value
-
-    @opsbf_save.setter
-    def opsbf_save(self, value):
-        self._opsbf_save = value
-
-    @other.setter
-    def other(self, value: Dict):
-        self._other = value
-
-    @display_order.setter
-    def display_order(self, value: List[TaskID]):
-        self._display_order = value
-
-    @glympse.setter
-    def glympse(self, value: str):
-        self._glympse = value
-
-    @status_tag.setter
-    def status_tag(self, value: str):
-        self._status_tag = value
-
-    @ne.setter
-    def ne(self, value: LatLng):
-        self._ne = value
+        if "sw" in self._api_repr:
+            return LatLng(self._api_repr["sw"])
+        else:
+            return None
 
     @nw.setter
     def nw(self, value: LatLng):
-        self._nw = value
-
-    @ne.setter
-    def ne(self, value: LatLng):
-        self._ne = value
-
-    @nw.setter
-    def nw(self, value: LatLng):
-        self._nw = value
+        self._api_repr["nw"] = value
 
     def _base_url(self):
         return "/op/" + str(self.id)
@@ -381,13 +347,13 @@ class Operation:
         """
         Save all changes to Tasks server.
         """
-        self._proxy.put(self._base_url(), self._to_api())
+        self._proxy.put(self._base_url(), self._api_repr)
 
     def update(self):
         """
         Update data from Tasks servers.
         """
-        self._from_api(self._proxy.get(self._base_url()))
+        self._api_repr = self._proxy.get(self._base_url())
 
     def delete(self):
         """
@@ -416,16 +382,10 @@ class Operation:
         Parameter is a list of dictionaries with the parameters of each task.
         Each one must have al least lat, lon, type and name.
         """
+        raise PyEnlOneNotImplementedException
+
         for task in tasks:
-            if "portal_id" in task:
-                task["portalID"] = task["portal_id"]
-            if "link_target" in task:
-                task["linkTarget"] = task["link_target"]
-            if "group_name" in task:
-                task["groupName"] = task["group_name"]
-            if "portal_image" in task:
-                task["portalImage"] = task["portal_image"]
-            task["todo"] = task["todo"].value
+            _fix_task_params(task)
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.post(self._base_url() + "/task", tasks)]
 
@@ -444,56 +404,60 @@ class Operation:
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get(self._base_url() + "/task")]
 
-    def add_grant(self):
+    def grant(self, grant: dict):
         """
         Grant permission.
         """
-        pass
+        self._proxy.post(self._base_url() + "/grant", grant)
 
-    def remove_grant(self):
+    def remove_grant(self, grant: dict):
         """
         Remove grant.
         """
-        pass
+        self._proxy.delete(self._base_url() + "/grant", grant)
 
-    def get_grants(self):
+    def get_grants(self) -> List[dict]:
         """
         Retrieve all grants on this op.
         """
-        pass
+        return self._proxy.get(self._base_url() + "/grant")
 
-    def my_grants(self):
+    def my_grants(self) -> List[dict]:
         """
         Retrieve all grants applicable to this user.
         """
-        pass
+        return self._proxy.get(self._base_url() + "/permissions")
 
-    def send_message(self, text: str) -> MessageID:
+    def send_message(self, msg: dict):
         """
         Post new message to the op-chat.
         """
-        pass
+        return self._proxy.post(self._base_url() + "/messages", msg)
 
     def get_message(self, message_id):
         """
         Retrieve a specific message.
         """
-        pass
+        return self._proxy.get(self._base_url() + "/messages/" + str(message_id))
+
+    def edit_message(self, message_id, edit):
+        return self._proxy.put(self._base_url() + "/messages/" + str(message_id),
+                               edit)
 
     def get_messages(self, offset=0):
         """
         Retrieve up to 50 messages, add offset to query more
         """
-        pass
+        return self._proxy.get(self._base_url() + "/messages")
 
     def get_users(self):
         """
         Returns Array of agents with permissions.
         """
-        pass
+        return self._proxy.get(self._base_url() + "/users")
 
-    def sync_rocks_comm(self):
+    def sync_rocks_community(self, key):
         """
-        For Webhooks from rocks
+        For rocks community webhooks.
         """
-        pass
+        return self._proxy.get(self._base_url() + "/syncRocksComm/" + str(key))

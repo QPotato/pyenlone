@@ -50,7 +50,7 @@ class V:
 
     def __init__(self, cache=0, **kwargs):
         if "token" in kwargs:
-            self._proxy = TokenProxy(self._base_url,
+            self._proxy = TokenProxy(self._base_url + "/oauth",
                                      "Bearer " + kwargs["token"],
                                      cache=cache)
             self._delegate = OAuthDelegate(self._proxy)

@@ -1,7 +1,8 @@
 import unittest
 from datetime import datetime
 
-from pyenlone.tasks import Tasks, OpType, TaskType
+from pyenlone.v import V
+from pyenlone.tasks import *
 from pyenlone.enloneexception import NotImplementedByBackendException
 
 DRAW = """[{"type":"polyline","latLngs":[{"lat":-32.777775,"lng":-61.604255},{"lat":-33.258328,"lng":-58.023684}],"color":"#a24ac3"}]"""
@@ -40,6 +41,7 @@ class TestTasksApikey(unittest.TestCase):
         with open("APIKEY") as input_file:
             apikey = input_file.read()[:-1]
         self.tasks_api = Tasks(apikey=apikey)
+        self.V = V(apikey=apikey)
         self.test_op = self.tasks_api.new_operation("Test OP", OpType.FIELD, draw=DRAW)
 
     def tearDown(self):
@@ -52,7 +54,7 @@ class TestTasksApikey(unittest.TestCase):
         T.get_operations()
         T.search_operations(-32.878981, -61.022595, 350)
         T.get_tasks()
-        self.assertRaises(NotImplementedByBackendException, T.search_tasks, -32.878981, -61.022595, 350)
+        op.update()
         op.end = datetime(2030, 12, 25)
         op.name = "Test2"
         op.start = datetime(2018, 11, 10, 10, 0, 0)
@@ -70,22 +72,24 @@ class TestTasksApikey(unittest.TestCase):
         op.status_tag = "asd"
         op.save()
         op.update()
-        op.new_task("Test task", -32.878981, -61.022595, TaskType.DESTROY)
-        op.bulk_new_task([{
-            "name": "Test task",
-            "lat": -32.878981,
-            "lon": -61.022595,
-            "todo":TaskType.DESTROY
-        }, {
-            "name": "Test task",
-            "lat": -32.878981,
-            "lon": -61.022595,
-            "todo":TaskType.DESTROY
-        }])
+        op.new_task(" task", -32.878981, -61.022595, TaskType.DESTROY)
         tasks = op.get_tasks()
         op.get_task(tasks[0].id)
         op = T.get_operation(op.id)
         print_op(op)
+        op.grant([{"type": "vteam",
+                      "id": self.V.list_teams()[0].teamid,
+                      "permission": "m"}])
+        op.remove_grant([{"type": "vteam",
+                      "id": self.V.list_teams()[0].teamid,
+                      "permission": "m"}])
+        msg = op.send_message({"message": "Bring booze and XMPs!"})
+        op.edit_message(msg["id"], {"message": "Bring booze, XMPs and Santa hats!"})
+        op.get_messages()
+        op.get_users()
+        op.my_grants()
+        op.get_grants()
+
         """
         [{'createdAt': 1542744594375,
           'displayOrder': [403094, 403095, 403096, 403097],
@@ -106,13 +110,104 @@ class TestTasksApikey(unittest.TestCase):
     def test_task(self):
         T = self.tasks_api
         op = self.test_op
-        op.new_task("Test task", -32.878981, -61.022595, TaskType.DESTROY)
+        task1 = op.new_task('DESTROY: Titirangi Reserve', -43.476352, 172.687535, TaskType.DESTROY,
+                            portal='Titirangi Reserve',
+                            portal_id="6a6993f1cb3a4e30ab24a6fcd04c4c68.16",
+                            portal_init_state=portal_init_state,
+                            priority=4,
+                            repeat=3,
+                            start=datetime(2020, 12, 25),
+                            end=datetime(2030, 12, 25))
+        task2 = op.new_task('DESTROY: Titirangi Reserve', -43.476352, 172.687535, TaskType.DESTROY,
+                            portal='Titirangi Reserve',
+                            portal_id="6a6993f1cb3a4e30ab24a6fcd04c4c68.16",
+                            portal_init_state=portal_init_state,
+                            priority=4,
+                            repeat=3,
+                            start=datetime(2020, 12, 25),
+                            end=datetime(2030, 12, 25))
+        task3 = op.new_task('DESTROY: Titirangi Reserve', -43.476352, 172.687535, TaskType.DESTROY,
+                            portal='Titirangi Reserve',
+                            portal_id="6a6993f1cb3a4e30ab24a6fcd04c4c68.16",
+                            portal_init_state=portal_init_state,
+                            priority=4,
+                            repeat=3,
+                            start=datetime(2020, 12, 25),
+                            end=datetime(2030, 12, 25))
+        task1.alternative = task3.id
+        task2.previous = task1.id
+        task1.save()
+        task2.save()
+        task1.update()
+        task2.update()
+        task1.accept()
+        task1.get_acknowledge()
+        task1.complete()
+        task1.get_complete()
+        task1.delete()
+        task3.grant([{"type": "vteam",
+                      "id": self.V.list_teams()[0].teamid,
+                      "permission": "m"}])
+        task3.remove_grant([{"type": "vteam",
+                      "id": self.V.list_teams()[0].teamid,
+                      "permission": "m"}])
+        task3.assign([{"type": "vteam", "id": self.V.list_teams()[0].teamid}])
+        op.my_grants()
+        op.get_grants()
 
 
-@unittest.skip
+
 class TestTasksVOAuth(TestTasksApikey):
     def setUp(self):
         with open("TOKEN") as input_file:
-            apikey = input_file.read()[:-1]
-        self.tasks_api = Tasks(VOAuth=apikey)
+            token = input_file.read()[:-1]
+        self.tasks_api = Tasks(voauth=token)
+        self.V = V(token=token)
         self.test_op = self.tasks_api.new_operation("Test OP", OpType.FIELD, draw=DRAW)
+
+
+portal_init_state = {'artifactBrief': None,
+                              'artifactDetail': None,
+                              'health': 100,
+                              'level': 6,
+                              'mods': [{'name': 'Portal Shield',
+                                        'owner': 'Xanthe02',
+                                        'rarity': 'COMMON',
+                                        'stats': {'MITIGATION': '30',
+                                                  'REMOVAL_STICKINESS': '0'}},
+                                       None,
+                                       None,
+                                       {'name': 'Portal Shield',
+                                        'owner': 'evs99',
+                                        'rarity': 'COMMON',
+                                        'stats': {'MITIGATION': '30',
+                                                  'REMOVAL_STICKINESS': '0'}}],
+                              'ornaments': [],
+                              'owner': 'evs99',
+                              'resCount': 8,
+                              'resonators': [{'energy': 4000,
+                                              'level': 6,
+                                              'owner': 'evs99'},
+                                             {'energy': 4000,
+                                              'level': 6,
+                                              'owner': 'Xanthe02'},
+                                             {'energy': 3000,
+                                              'level': 5,
+                                              'owner': 'Xanthe02'},
+                                             {'energy': 5000,
+                                              'level': 7,
+                                              'owner': 'Xanthe02'},
+                                             {'energy': 6000,
+                                              'level': 8,
+                                              'owner': 'Xanthe02'},
+                                             {'energy': 5000,
+                                              'level': 7,
+                                              'owner': 'evs99'},
+                                             {'energy': 6000,
+                                              'level': 8,
+                                              'owner': 'evs99'},
+                                             {'energy': 4000,
+                                              'level': 6,
+                                              'owner': 'Xanthe02'}],
+                              'team': 'R',
+                              'timestamp': 1499993733589}

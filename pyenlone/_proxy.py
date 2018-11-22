@@ -16,6 +16,7 @@ class EnlOneConnectionException(EnlOneException):
 
 
 def api_result(response):
+    # from pprint import pprint; pprint(response)
     if not response:
         raise EnlOneConnectionException(response.text)
     if "status" in response.json() and response.json()["status"] == "error":
@@ -65,18 +66,15 @@ class KeyProxy(Proxy):
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
 
-    def post(self, endpoint, data):
+    def post(self, endpoint, json):
         """
         Do a post request adding the apikey as a parameter.
         """
         url = self._base_url + endpoint
         try:
-            import json; print(json.dumps(data));
             response = self._session.post(url,
                                           params={"apikey": self._apikey},
-                                          json=data)
-            print(response.url)
-            import json; print(json.dumps(data));
+                                          json=json)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
@@ -94,13 +92,15 @@ class KeyProxy(Proxy):
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
 
-    def delete(self, endpoint):
+    def delete(self, endpoint, json={}):
         """
         Do a delete request adding the apikey as a parameter.
         """
         url = self._base_url + endpoint
         try:
-            response = self._session.delete(url, params={"apikey": self._apikey})
+            response = self._session.delete(url,
+                                            params={"apikey": self._apikey},
+                                            json=json)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
@@ -112,7 +112,7 @@ class TokenProxy(Proxy):
     """
     def __init__(self, base_url, token, cache=0):
         self._token = token
-        self._base_url = base_url + "/oauth"
+        self._base_url = base_url
         self._session = CachedSession(expire_after=cache)
 
     def get(self, endpoint, params={}):
@@ -123,6 +123,7 @@ class TokenProxy(Proxy):
         headers = {'Authorization': self._token}
         try:
             response = self._session.get(url, headers=headers, params=params)
+            print(response.url)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
@@ -151,14 +152,14 @@ class TokenProxy(Proxy):
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)
 
-    def delete(self, endpoint, json):
+    def delete(self, endpoint, json={}):
         """
         Do a get request adding the Authorization header.
         """
         url = self._base_url + endpoint
         headers = {'Authorization': self._token}
         try:
-            response = self._session.post(url, headers=headers)
+            response = self._session.delete(url, headers=headers, json=json)
         except requests.exceptions.RequestException:
             raise EnlOneException("Error contacting enl.one servers.")
         return api_result(response)

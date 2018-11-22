@@ -13,5 +13,16 @@ class EnlOneException(Exception):
     """
     pass
 
+
 class NotImplementedByBackendException(EnlOneException):
+    """
+    Raised by placeholder method still not implemeted by the backend.
+    """
+    pass
+
+
+class PyEnlOneNotImplementedException(EnlOneException):
+    """
+    Raised by placeholder method still not implemeted by the backend.
+    """
     pass

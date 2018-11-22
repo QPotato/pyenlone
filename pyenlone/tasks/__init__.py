@@ -5,18 +5,20 @@ More info on: https://wiki.enl.one/doku.php?id=t_basic_documentation
 from typing import List, Optional
 
 from .operation import Operation, OpID, OpType, _fix_op_params
-from .task import Task, TaskID, TaskType, PortalID, _fix_task_params
-from .message import Message, MessageID
-from .grant import Grant
+from .task import Task, TaskID, TaskType, TaskStatus, PortalID, _fix_task_params
 from .._proxy import TokenProxy, KeyProxy
 from ..enloneexception import NotImplementedByBackendException
 
 __all__ = ["Operation", "OpID", "OpType",
-           "Task", "TaskID",  "TaskType", "PortalID",
-           "Message", "MessageID", "Grant", "Tasks"]
+           "Task", "TaskID",  "TaskType", "TaskStatus", "PortalID",
+           "Tasks"]
 
 
 class Tasks:
+    """
+    The main Tasks object.
+    You should create and get operation using it's methods.
+    """
     def __init__(self,
                  apikey: Optional[str] = None,
                  voauth: Optional[str] = None,
@@ -25,19 +27,22 @@ class Tasks:
                  google: Optional[str] = None,
                  firebase: Optional[str] = None,
                  cache: int = 0):
+        """
+        Create the Tasks instance with only one auth method token.
+        """
         url = "https://tasks.enl.one"
         if apikey:
             self._proxy = KeyProxy(url + "/api", apikey, cache=cache)
         elif voauth:
-            self._proxy = TokenProxy(url + "/oauth", "VOAuth " + token, cache=cache)
+            self._proxy = TokenProxy(url + "/oauth", "VOAuth " + voauth, cache=cache)
         elif rocks:
-            self._proxy = TokenProxy(url + "/rocks", "Rocks " + token, cache=cache)
+            self._proxy = TokenProxy(url + "/rocks", "Rocks " + rocks, cache=cache)
         elif enlio:
-            self._proxy = TokenProxy(url + "/enlio", "EnlIO " + token, cache=cache)
+            self._proxy = TokenProxy(url + "/enlio", "EnlIO " + enlio, cache=cache)
         elif google:
-            self._proxy = TokenProxy(url + "/gapi", "Google " + token, cache=cache)
+            self._proxy = TokenProxy(url + "/gapi", "Google " + google, cache=cache)
         elif firebase:
-            self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + token, cache=cache)
+            self._proxy = TokenProxy(url + "/firebase", "FirebaseJWT " + firebase, cache=cache)
 
     def get_operation(self, id: OpID):
         """
@@ -86,7 +91,6 @@ class Tasks:
         _fix_task_params(filters)
         return [Task(self._proxy, api_res) for api_res
                 in self._proxy.get("/tasks", filters)]
-
 
     def search_tasks(self, lat: float, lon: float, km: float, **filters) -> List[Task]:
         """
