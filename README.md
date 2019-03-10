@@ -34,5 +34,5 @@ here https://wiki.enl.one/doku.php?id=t_basic_documentation
 
 
 # TODO
-- Add webhooks and sockets and other things I don't really understand to Tasks
--
+- Add webhooks, sockets and firebase Tasks
+- Implement status.enl.one
